@@ -19,6 +19,16 @@ import re
 from pathlib import Path
 
 import fitz  # PyMuPDF
+import logging
+
+try:
+    from pdf2image import convert_from_path
+    import pytesseract
+    OCR_AVAILABLE = True
+except ImportError:
+    OCR_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
 
 # Extensiones soportadas
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".csv", ".xlsx"}
@@ -111,7 +121,7 @@ def _infer_category(text: str, ext: str) -> str:
 
 
 def _extract_pdf(file_path: str) -> str:
-    """Extrae texto de un PDF usando PyMuPDF."""
+    """Extrae texto de un PDF usando PyMuPDF. Si falla o no encuentra texto útil, usa OCR."""
     try:
         doc = fitz.open(file_path)
     except Exception as e:
@@ -124,7 +134,27 @@ def _extract_pdf(file_path: str) -> str:
             text_parts.append(page_text)
 
     doc.close()
-    return "\n".join(text_parts)
+    extracted_text = "\n".join(text_parts)
+
+    # Heurística: Si el PDF tiene menos de 50 caracteres (ej. una imagen escaneada gigante),
+    # intentamos usar Tesseract OCR como fallback.
+    if len(extracted_text.strip()) < 50 and OCR_AVAILABLE:
+        logger.info(f"Poco texto extraído de {file_path}. Iniciando Tesseract OCR fallback...")
+        try:
+            # Convertimos las páginas del PDF a imágenes (máximo 300 DPI)
+            images = convert_from_path(file_path, dpi=300)
+            ocr_text_parts = []
+            for img in images:
+                # Extraemos texto usando los modelos en español e inglés
+                page_ocr = pytesseract.image_to_string(img, lang="spa+eng")
+                ocr_text_parts.append(page_ocr)
+            
+            extracted_text = "\n".join(ocr_text_parts)
+            logger.info("OCR finalizado exitosamente.")
+        except Exception as e:
+            logger.warning(f"Fallo en el OCR fallback para {file_path}: {e}")
+
+    return extracted_text
 
 
 def _extract_txt(file_path: str) -> str:
