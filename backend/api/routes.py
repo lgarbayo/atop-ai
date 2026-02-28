@@ -143,26 +143,31 @@ async def search_documents(
     try:
         start_time = time.time()
 
-        # Reverse-map: los chips del frontend envían tipos como "pdf", "contract", "invoice"
-        # pero Qdrant almacena la extensión real del archivo (.pdf, .csv, etc.)
-        type_to_extensions = {
-            "pdf": [".pdf", ".txt", ".png", ".jpg", ".jpeg"],  # Documentos generales
-            "contract": [".pdf"],   # Contratos son PDFs
-            "invoice": [".csv", ".xlsx"],  # Facturas son datos tabulares
-            "code_snippet": [".txt"],  # Código fuente
-            "proposal": [".pdf"],  # Propuestas son PDFs
-        }
-
         filters = {}
         if type:
-            # Convertir tipos del frontend a extensiones reales
             extensions = []
+            categories = []
+            
+            # Map known frontend file types to real extensions
+            ext_map = {
+                "pdf": [".pdf"],
+                "txt": [".txt"],
+                "csv": [".csv"],
+                "xlsx": [".xlsx"],
+                "image": [".png", ".jpg", ".jpeg", ".gif"],
+            }
+            
             for t in type:
-                extensions.extend(type_to_extensions.get(t, []))
-            # Deduplicar
-            extensions = list(set(extensions))
+                if t in ext_map:
+                    extensions.extend(ext_map[t])
+                else:
+                    # Si no es un formato de archivo conocido, es una Categoría (ej. RRHH, Finanzas)
+                    categories.append(t)
+            
             if extensions:
-                filters["extension"] = extensions
+                filters["extension"] = list(set(extensions))
+            if categories:
+                filters["category"] = list(set(categories))
 
         # Normalizar la query
         q_normalized = normalize_query(q)
