@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse
 
 from workers.tasks import process_document
 from services.vector_db import VectorDBService
+from services.document_extractor import SUPPORTED_EXTENSIONS
 from core.config import settings
 from celery.result import AsyncResult
 
@@ -31,21 +32,21 @@ router = APIRouter()
 @router.post("/upload", tags=["Ingesta"])
 async def upload_document(file: UploadFile = File(...)):
     """
-    Sube un PDF para procesamiento asíncrono.
+    Sube un documento para procesamiento asíncrono.
 
-    1. Valida que sea un PDF
+    Formatos soportados: PDF, TXT, CSV, XLSX.
+
+    1. Valida la extensión del archivo
     2. Guarda el archivo en disco
     3. Dispara la tarea de Celery (NO bloquea)
     4. Devuelve HTTP 202 con el task_id para tracking
-
-    Returns:
-        202 Accepted con task_id y filename.
     """
     # Validar tipo de archivo
-    if not file.filename.lower().endswith(".pdf"):
+    ext = Path(file.filename).suffix.lower()
+    if ext not in SUPPORTED_EXTENSIONS:
         raise HTTPException(
             status_code=400,
-            detail="Solo se permiten archivos PDF."
+            detail=f"Formato no soportado: {ext}. Válidos: {', '.join(SUPPORTED_EXTENSIONS)}"
         )
 
     # Crear directorio de uploads si no existe
