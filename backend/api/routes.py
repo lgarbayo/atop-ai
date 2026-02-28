@@ -263,11 +263,11 @@ async def search_documents(
                     elif txt in keyword_texts:
                         r["score"] = r.get("score", 0.0) * 1.05  # slight boost for keyword-only
 
-                raw_results = sorted(merged, key=lambda r: r.get("score", 0.0), reverse=True)[:top_k]
-                logger.info(f"🔀 Resultados combinados: {len(raw_results)} (query + keywords)")
-                elif keyword_results:
-                    # Solo teníamos keywords results (fallback)
-                    raw_results = keyword_results
+                        raw_results = sorted(merged, key=lambda r: r.get("score", 0.0), reverse=True)[:top_k]
+                        logger.info(f"🔀 Resultados combinados: {len(raw_results)} (query + keywords)")
+                    elif keyword_results:
+                        # Solo teníamos keywords results (fallback)
+                        raw_results = keyword_results
             except Exception as e:
                 logger.error(f"❌ Error en extracción de palabras clave: {e}")
                 # Si falla la extracción, continuar con resultados originales (vacíos o no)
