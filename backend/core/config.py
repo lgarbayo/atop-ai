@@ -27,8 +27,8 @@ class Settings(BaseSettings):
 
     # ─── Embeddings ───
     EMBEDDING_PROVIDER: str = "sentence-transformers"  # "sentence-transformers" | "openai"
-    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
-    EMBEDDING_DIM: int = 384  # Dimensión del vector (384 para MiniLM, 1536 para OpenAI)
+    EMBEDDING_MODEL: str = "paraphrase-multilingual-MiniLM-L12-v2"
+    EMBEDDING_DIM: int = 384  # Dimensión del vector (384 para MiniLM)
 
     # ─── OpenAI (solo si EMBEDDING_PROVIDER=openai) ───
     OPENAI_API_KEY: str = ""
