@@ -195,12 +195,12 @@ class GeminiProvider(BaseLLMProvider):
     """
     Proveedor Google Gemini. Requiere:
         GEMINI_API_KEY
-        GEMINI_LLM_MODEL (opcional, default: gemini-1.5-flash)
+        GEMINI_LLM_MODEL (opcional, default: gemini-2.5-flash)
     """
     def __init__(self):
         import google.generativeai as genai
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model_name = os.getenv("GEMINI_LLM_MODEL", "gemini-1.5-flash")
+        model_name = os.getenv("GEMINI_LLM_MODEL", "gemini-2.5-flash")
         self.model = genai.GenerativeModel(model_name)
         logger.info(f"✅ Gemini LLM inicializado: {model_name}")
 
@@ -222,9 +222,7 @@ class GeminiProvider(BaseLLMProvider):
 
     def expand_keywords(self, query: str) -> str:
         prompt = (
-            f"Extract search keywords from the given query. "
-            f"Return ONLY a comma-separated list of relevant keywords, no explanations.\n"
-            f"Query: {query}\nKeywords:"
+            f"Concepts fitting to this definition: {query}\n"
         )
         return self.model.generate_content(prompt).text.strip()
 
