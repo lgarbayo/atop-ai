@@ -8,15 +8,26 @@ Ejecución:
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import router
+from services.vector_db import VectorDBService
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Pre-cargar el modelo de ML en memoria RAM al arrancar el servidor
+    # para que la primera búsqueda no tarde 10 segundos.
+    _ = VectorDBService()
+    yield
+    # Lógica de apagado (opcional)
 
 app = FastAPI(
     title="Meiga — Asistente de Conocimiento Corporativo",
     description="Backend RAG: ingesta de PDFs, procesamiento async, búsqueda semántica.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS — permite peticiones desde cualquier frontend (desarrollo)
