@@ -188,14 +188,14 @@ async def search_documents(
             # Mapear extensión a DocumentType del frontend
             type_map = {
                 "pdf": "pdf",
-                "txt": "pdf",        # El frontend no tiene tipo "txt"
-                "csv": "invoice",    # Mapeo razonable para datos tabulares
-                "xlsx": "invoice",
-                "png": "pdf",        # Imágenes procesadas por OCR
-                "jpg": "pdf",
-                "jpeg": "pdf",
+                "txt": "txt",
+                "csv": "csv",
+                "xlsx": "xlsx",
+                "png": "image",
+                "jpg": "image",
+                "jpeg": "image",
             }
-            doc_type = type_map.get(ext, "pdf")
+            doc_type = type_map.get(ext, ext)
 
             # Construir DocumentMetadata
             now_iso = datetime.now(timezone.utc).isoformat()
@@ -313,17 +313,19 @@ async def get_document_detail(source: str = Query(..., description="Ruta del arc
 
         # Metadatos
         ext = file_path.suffix.lower()
+        ext_clean = ext.lstrip(".")
         type_map = {
-            ".pdf": "pdf", ".txt": "pdf", ".csv": "invoice",
-            ".xlsx": "invoice", ".png": "pdf", ".jpg": "pdf", ".jpeg": "pdf",
+            "pdf": "pdf", "txt": "txt", "csv": "csv",
+            "xlsx": "xlsx", "png": "image", "jpg": "image", "jpeg": "image",
         }
+        doc_type = type_map.get(ext_clean, ext_clean)
         first_chunk = chunks[0] if chunks else {}
 
         return {
             "source": source,
             "title": file_path.stem.replace("_", " ").title(),
             "extension": ext,
-            "type": type_map.get(ext, "pdf"),
+            "type": doc_type,
             "category": first_chunk.get("category", "General"),
             "totalChunks": len(chunks),
             "wordCount": len(full_text.split()),
