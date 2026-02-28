@@ -1097,10 +1097,69 @@
       font-family: 'Courier New', monospace;
       word-break: break-all;
     }
+
+    /* Drag & Drop Overlay */
+    .drag-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 33, 61, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: none; /* hidden by default */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.2s ease;
+    }
+    .drag-overlay.active {
+      display: flex;
+    }
+    .drag-box {
+      border: 3px dashed rgba(255, 255, 255, 0.4);
+      border-radius: 24px;
+      padding: 60px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      pointer-events: none; /* Let drag events pass through to the overlay */
+      max-width: 90%;
+      text-align: center;
+    }
+    .drag-icon {
+      color: #fca311;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 8px;
+    }
+    .drag-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .drag-subtitle {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- DRAG OVERLAY -->
+  <div id="dragOverlay" class="drag-overlay">
+    <div class="drag-box">
+      <svg class="drag-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+        <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+      </svg>
+      <h2 class="drag-title">Suelta el archivo aquí</h2>
+      <p class="drag-subtitle">Se subirá y se indexará automáticamente</p>
+    </div>
+  </div>
 
   <!-- ROOT DIRECTORY PICKER OVERLAY -->
   <div class="picker-backdrop" id="pickerOverlay" style="display:none">
@@ -1175,17 +1234,6 @@
               d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
           </svg>
           <span>Limpiar base de datos</span>
-        </button>
-
-        <button class="fm-action-btn" disabled>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-2.941 1.1c-.757.652-1.153 1.438-1.153 2.055v.448l-.445.049C2.064 4.805 1 5.952 1 7.318 1 8.785 2.23 10 3.781 10H6a.5.5 0 0 1 0 1H3.781C1.708 11 0 9.366 0 7.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383z" />
-            <path fill-rule="evenodd"
-              d="M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3z" />
-          </svg>
-          <span>Añadir archivos sueltos</span>
-          <span class="fm-soon-badge">Próximamente</span>
         </button>
       </div>
     </div>
@@ -1711,6 +1759,70 @@
 
     function closeDocDetail() {
       $('ddModal').style.display = 'none';
+    }
+
+    /* ── Drag and Drop Upload ──────────────────────────────── */
+    let dragCounter = 0;
+
+    window.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      // Solo activamos D&D si ya hay un rootDir configurado
+      if (!rootDirPath) return; 
+      dragCounter++;
+      $('dragOverlay').classList.add('active');
+    });
+
+    window.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      if (!rootDirPath) return;
+      dragCounter--;
+      if (dragCounter === 0) {
+        $('dragOverlay').classList.remove('active');
+      }
+    });
+
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault(); // Obligatorio para permitir el drop
+    });
+
+    window.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      if (!rootDirPath) return;
+      
+      dragCounter = 0;
+      $('dragOverlay').classList.remove('active');
+
+      const files = e.dataTransfer.files;
+      if (!files || files.length === 0) return;
+
+      const file = files[0]; // Solo soportamos uno por ahora
+      await uploadDocument(file);
+    });
+
+    async function uploadDocument(file) {
+      showToast(`Subiendo ${esc(file.name)}...`, 5000);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const r = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!r.ok) {
+          const err = await r.json();
+          throw new Error(err.detail || 'Error en la subida');
+        }
+        
+        const data = await r.json();
+        showToast(`✓ ${esc(file.name)} subido. Indexando en segundo plano...`, 4000);
+        
+        // Opcional: podríamos hacer polling al /api/status/{task_id} para avisar 
+        // cuando termine, pero por ahora un toast de éxito es suficiente.
+      } catch (e) {
+        showToast(`Error al subir: ${e.message}`);
+      }
     }
 
     /* ── Event listeners ───────────────────────────────────── */
