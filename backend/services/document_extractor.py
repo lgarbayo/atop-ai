@@ -23,7 +23,7 @@ import logging
 
 try:
     from pdf2image import convert_from_path
-    from PIL import Image
+    from PIL import Image, ImageOps
     import pytesseract
     OCR_AVAILABLE = True
 except ImportError:
@@ -149,8 +149,10 @@ def _extract_pdf(file_path: str) -> str:
             images = convert_from_path(file_path, dpi=300)
             ocr_text_parts = []
             for img in images:
+                # Corregir rotación EXIF si la hay
+                img = ImageOps.exif_transpose(img)
                 # Extraemos texto usando los modelos en español e inglés
-                page_ocr = pytesseract.image_to_string(img, lang="spa+eng")
+                page_ocr = pytesseract.image_to_string(img, lang="spa+eng", config="--psm 1")
                 ocr_text_parts.append(page_ocr)
             
             extracted_text = "\n".join(ocr_text_parts)
@@ -169,7 +171,11 @@ def _extract_img(file_path: str) -> str:
     try:
         logger.info(f"Procesando imagen con OCR: {file_path}")
         img = Image.open(file_path)
-        extracted_text = pytesseract.image_to_string(img, lang="spa+eng")
+        # Corregir rotación EXIF típica de móviles
+        img = ImageOps.exif_transpose(img)
+        
+        # OSD (Orientation and Script Detection) forzar auto-rotación si no hay EXIF (--psm 1)
+        extracted_text = pytesseract.image_to_string(img, lang="spa+eng", config="--psm 1")
         return extracted_text
     except Exception as e:
         raise ValueError(f"Fallo al realizar OCR sobre la imagen: {e}")

@@ -30,6 +30,7 @@ services:
     volumes:
       - .:/app
       - upload_data:/app/uploads
+      - ../datasets:/app/datasets:ro
     env_file:
       - .env
     depends_on:
@@ -46,6 +47,7 @@ services:
     volumes:
       - .:/app
       - upload_data:/app/uploads
+      - ../datasets:/app/datasets:ro
     env_file:
       - .env
     depends_on:
