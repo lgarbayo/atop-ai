@@ -745,6 +745,60 @@
       color: var(--text);
     }
 
+    /* Query Expansion Info Banner */
+    .query-expansion-info {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(139, 92, 246, 0.06) 100%);
+      border-radius: 10px;
+      border-left: 3px solid #8b5cf6;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.08);
+    }
+
+    .query-expansion-info .icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+    }
+
+    .query-expansion-info .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .query-expansion-info .label {
+      font-size: .75rem;
+      font-weight: 600;
+      color: #7c3aed;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .query-expansion-info .keywords {
+      font-size: .88rem;
+      color: var(--text);
+      font-weight: 500;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .query-expansion-info .keywords mark {
+      background: rgba(139, 92, 246, 0.15);
+      color: #6d28d9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin: 0 2px;
+      font-weight: 600;
+    }
+
     /* File Explorer Modal */
     .fe-backdrop {
       position: fixed;
@@ -1417,6 +1471,19 @@
         </svg>
         <p id="emptyText" style="margin:0;font-size:.88rem;text-align:center"></p>
       </div>
+      <!-- Query Expansion Info (LLM) -->
+      <div id="queryExpansionInfo" class="query-expansion-info" style="display:none">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="#8b5cf6" viewBox="0 0 16 16">
+          <path d="M9.669.864 8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193.684 1.365 1.086 1.072L12.387 6l.248 1.506-1.086 1.072-.684 1.365-1.51.229L8 10.874l-1.355-.702-1.51-.229-.684-1.365-1.086-1.072L3.614 6l-.25-1.506 1.087-1.072.684-1.365 1.51-.229L8 1.126l1.356.702 1.509.229z"/>
+          <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1 4 11.794z"/>
+        </svg>
+        <div class="content">
+          <div class="label">
+            <span>🤖 Búsqueda Descriptiva Activada</span>
+          </div>
+          <div class="keywords" id="expandedKeywords"></div>
+        </div>
+      </div>
       <p id="resultsMeta" style="display:none;font-size:.78rem;color:rgba(20,33,61,.55);margin:0"></p>
       <div id="resultsList" class="flex flex-col gap-3" style="display:none"></div>
     </div>
@@ -1513,6 +1580,7 @@
       $('stateEmpty').style.display = s === 'empty' ? 'flex' : 'none';
       $('resultsMeta').style.display = s === 'results' ? 'block' : 'none';
       $('resultsList').style.display = s === 'results' ? 'flex' : 'none';
+      // Query expansion info se maneja separadamente (solo visible cuando hay expansión)
     }
 
     /* ── Root directory ────────────────────────────────────── */
@@ -1649,7 +1717,7 @@
       finally { if (btn) { btn.disabled = false; if (lbl) lbl.textContent = 'Elegir carpeta' } $('searchBtn').disabled = false }
     }
 
-    function resetSearchState() { hasSearched = false; currentQuery = ''; $('searchInput').value = ''; showResultsState('hidden'); setHasSearched(false) }
+    function resetSearchState() { hasSearched = false; currentQuery = ''; $('searchInput').value = ''; showResultsState('hidden'); setHasSearched(false); $('queryExpansionInfo').style.display = 'none'; }
 
     /* ── File manager ──────────────────────────────────────── */
     function toggleFmMenu() { fmOpen = !fmOpen; $('fmPopover').style.display = fmOpen ? 'flex' : 'none'; $('fmBackdrop').style.display = fmOpen ? 'block' : 'none'; $('fmChevron').style.transform = fmOpen ? 'rotate(180deg)' : '' }
@@ -1747,8 +1815,10 @@
     }
     async function performSearch(q) {
       showResultsState('loading');
+      // Ocultar query expansion info al inicio de nueva búsqueda
+      $('queryExpansionInfo').style.display = 'none';
       try {
-        const p = new URLSearchParams({ q, top_k: 10 });
+        const p = new URLSearchParams({ q, top_k: 10, expand: currentMode === 'descriptive' });
         activeFilters.forEach(t => p.append('type', t));
         const r = await fetch(`/api/search?${p}`);
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -1757,6 +1827,20 @@
         const n = data.total;
         $('resultsMeta').textContent = `${n} resultado${n !== 1 ? 's' : ''} encontrado${n !== 1 ? 's' : ''}`;
         $('resultsList').innerHTML = data.results.map(renderCard).join('');
+        
+        // 🔍 Mostrar información de Query Expansion si se usó el LLM
+        if (data.searchMode === 'descriptive') {
+          const rawExpanded = data.expandedQuery || '';
+          const keywords = rawExpanded.split(',').map(k => k.trim()).filter(k => k);
+          if (keywords.length > 0) {
+            const keywordsHtml = keywords.map(k => `<mark>${esc(k)}</mark>`).join(' ');
+            $('expandedKeywords').innerHTML = `Keywords generadas: ${keywordsHtml}`;
+          } else {
+            $('expandedKeywords').innerHTML = `<span style="opacity:.6">Sin keywords extraídas</span>`;
+          }
+          $('queryExpansionInfo').style.display = 'flex';
+        }
+        
         showResultsState('results');
       } catch (e) { $('errorText').textContent = e.message; showResultsState('error') }
     }
