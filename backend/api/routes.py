@@ -257,6 +257,14 @@ async def view_document(source: str = Query(..., description="Ruta del archivo f
     Sirve el archivo original directamente para visualizarlo (PDF, Imagen, etc.).
     """
     file_path = Path(source)
+    
+    # Fallback para desarrollo local: si la BD (en Docker) guardó '/app/datasets/archivo.pdf'
+    # pero FastAPI se está ejecutando en el Mac, buscar en '../datasets/archivo.pdf'
+    if not file_path.exists() and str(file_path).startswith("/app/datasets/"):
+        local_path = Path("../datasets") / file_path.name
+        if local_path.exists():
+            file_path = local_path
+
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(status_code=404, detail="El archivo original ya no existe en disco.")
         
@@ -277,8 +285,13 @@ async def get_document_detail(source: str = Query(..., description="Ruta del arc
         # Reconstruir texto completo
         full_text = "\n\n".join([c["text"] for c in chunks])
 
-        # Obtener tamaño del archivo si existe
+        # Obtener tamaño del archivo si existe (incluyendo fallback local)
         file_path = Path(source)
+        if not file_path.exists() and str(file_path).startswith("/app/datasets/"):
+            local_path = Path("../datasets") / file_path.name
+            if local_path.exists():
+                file_path = local_path
+                
         file_size = file_path.stat().st_size if file_path.exists() else None
 
         # Metadatos
