@@ -3,21 +3,21 @@
     class="mode-btn"
     [class.active]="activeMode === 'direct'"
     (click)="setMode('direct')"
-    title="Direct keyword search"
     type="button"
-    aria-label="Direct search"
+    aria-label="Búsqueda directa"
   >
     <ion-icon name="search-outline"></ion-icon>
+    <span>Búsqueda directa</span>
   </button>
 
   <button
     class="mode-btn"
     [class.active]="activeMode === 'descriptive'"
     (click)="setMode('descriptive')"
-    title="Descriptive / semantic search"
     type="button"
-    aria-label="Descriptive semantic search"
+    aria-label="Búsqueda descriptiva"
   >
     <ion-icon name="sparkles-outline"></ion-icon>
+    <span>Búsqueda descriptiva</span>
   </button>
 </div>

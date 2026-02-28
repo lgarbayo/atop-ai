@@ -1,7 +1,19 @@
 <ion-content class="search-shell-content">
+
+  <!-- File Manager floating button -->
+  <app-file-manager-menu
+    [rootDirName]="(rootDirName$ | async)"
+    (pickDirectory)="onPickDirectory()"
+  ></app-file-manager-menu>
+
+  <!-- Root directory picker overlay -->
+  <app-root-directory-picker
+    *ngIf="showDirectoryPicker"
+  ></app-root-directory-picker>
+
   <div class="shell-layout" [class.shell-layout--results]="hasSearched">
 
-    <!-- ── Search Section ───────────────────────────────────────── -->
+    <!-- Search Section -->
     <section class="search-section">
 
       <div class="app-title" *ngIf="!hasSearched">
@@ -15,12 +27,15 @@
           [isLoading]="(isLoading$ | async) === true"
           (queryChange)="onQueryChange($event)"
           (searchSubmit)="onSearchSubmit($event)"
-        >
-          <app-search-mode-toggle
-            [activeMode]="activeMode"
-            (modeChange)="onModeChange($event)"
-          ></app-search-mode-toggle>
-        </app-search-bar>
+        ></app-search-bar>
+      </div>
+
+      <!-- Search mode toggle below the search bar -->
+      <div class="mode-toggle-row">
+        <app-search-mode-toggle
+          [activeMode]="activeMode"
+          (modeChange)="onModeChange($event)"
+        ></app-search-mode-toggle>
       </div>
 
       <div class="chips-wrapper">
@@ -31,9 +46,20 @@
         ></app-filter-chips>
       </div>
 
+      <!-- Recent searches (only in pre-search state) -->
+      <ng-container *ngIf="!hasSearched">
+        <app-recent-searches
+          *ngIf="(history$ | async)?.length"
+          [history]="(history$ | async) ?? []"
+          (selectSearch)="onSelectFromHistory($event)"
+          (removeSearch)="onRemoveFromHistory($event)"
+          (clearAll)="onClearHistory()"
+        ></app-recent-searches>
+      </ng-container>
+
     </section>
 
-    <!-- ── Results Section ──────────────────────────────────────── -->
+    <!-- Results Section -->
     <section class="results-section" *ngIf="hasSearched">
 
       <!-- Loading spinner -->
@@ -50,12 +76,12 @@
       <!-- Results list -->
       <ng-container *ngIf="!(isLoading$ | async) && !(error$ | async)">
         <p class="results-count" *ngIf="totalResults > 0">
-          {{ totalResults }} result{{ totalResults !== 1 ? 's' : '' }} found
+          {{ totalResults }} resultado{{ totalResults !== 1 ? 's' : '' }} encontrado{{ totalResults !== 1 ? 's' : '' }}
         </p>
 
         <div class="results-empty" *ngIf="totalResults === 0">
           <ion-icon name="search-outline"></ion-icon>
-          <p>No documents found for <strong>"{{ query }}"</strong></p>
+          <p>No se encontraron documentos para <strong>"{{ query }}"</strong></p>
         </div>
 
         <div class="results-list">

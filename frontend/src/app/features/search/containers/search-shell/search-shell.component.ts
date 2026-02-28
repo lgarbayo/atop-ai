@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 
 import { DocumentSearchService } from '../../../../core/services/document-search.service';
+import { RootDirectoryService } from '../../../../core/services/root-directory.service';
+import { SearchHistoryService } from '../../../../core/services/search-history.service';
 import {
   SearchMode,
   DocumentType,
@@ -15,10 +17,10 @@ import {
 
 const DEFAULT_CHIPS: FilterChip[] = [
   { label: 'PDFs',          value: 'pdf',         iconName: 'document-text-outline' },
-  { label: 'Contracts',     value: 'contract',    iconName: 'ribbon-outline'        },
-  { label: 'Code snippets', value: 'code_snippet',iconName: 'code-slash-outline'    },
-  { label: 'Invoices',      value: 'invoice',     iconName: 'receipt-outline'       },
-  { label: 'Proposals',     value: 'proposal',    iconName: 'bulb-outline'          },
+  { label: 'Contratos',     value: 'contract',    iconName: 'ribbon-outline'        },
+  { label: 'Código',        value: 'code_snippet',iconName: 'code-slash-outline'    },
+  { label: 'Facturas',      value: 'invoice',     iconName: 'receipt-outline'       },
+  { label: 'Propuestas',    value: 'proposal',    iconName: 'bulb-outline'          },
 ];
 
 @Component({
@@ -27,22 +29,49 @@ const DEFAULT_CHIPS: FilterChip[] = [
   styleUrls: ['./search-shell.component.scss'],
   standalone: false,
 })
-export class SearchShellComponent {
+export class SearchShellComponent implements OnInit, OnDestroy {
   query = '';
   activeMode: SearchMode = 'direct';
   activeFilters: DocumentType[] = [];
   results: SearchResult[] = [];
   totalResults = 0;
   hasSearched = false;
+  showDirectoryPicker = false;
 
   readonly chips: FilterChip[] = DEFAULT_CHIPS;
   readonly isLoading$: Observable<boolean>;
   readonly error$: Observable<string | null>;
+  readonly rootDirName$: Observable<string | null>;
+  readonly history$: Observable<string[]>;
 
-  constructor(private readonly searchService: DocumentSearchService) {
-    this.isLoading$ = searchService.isLoading$;
-    this.error$ = searchService.error$;
+  private readonly _subs = new Subscription();
+
+  constructor(
+    private readonly searchService: DocumentSearchService,
+    private readonly rootDirService: RootDirectoryService,
+    private readonly historyService: SearchHistoryService,
+  ) {
+    this.isLoading$  = searchService.isLoading$;
+    this.error$      = searchService.error$;
+    this.rootDirName$ = rootDirService.rootDirName$;
+    this.history$    = historyService.history$;
   }
+
+  ngOnInit(): void {
+    // Restore persisted directory; show picker if nothing is stored
+    this.rootDirService.loadStoredDirectory().then(() => {
+      const sub = this.rootDirService.rootDir$.subscribe(handle => {
+        this.showDirectoryPicker = handle === null;
+      });
+      this._subs.add(sub);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
+  }
+
+  // ── Search ───────────────────────────────────────────────────────
 
   onQueryChange(q: string): void {
     this.query = q;
@@ -61,6 +90,8 @@ export class SearchShellComponent {
   }
 
   onSearchSubmit(query: string): void {
+    this.historyService.addSearch(query);
+
     const request: SearchRequest = {
       query,
       mode: this.activeMode,
@@ -82,7 +113,27 @@ export class SearchShellComponent {
   }
 
   onCardClick(documentId: string): void {
-    // Future: navigate to document detail or open preview panel
     console.log('[SearchShell] Document selected:', documentId);
+  }
+
+  // ── Recent searches ──────────────────────────────────────────────
+
+  onSelectFromHistory(query: string): void {
+    this.query = query;
+    this.onSearchSubmit(query);
+  }
+
+  onRemoveFromHistory(query: string): void {
+    this.historyService.removeSearch(query);
+  }
+
+  onClearHistory(): void {
+    this.historyService.clearHistory();
+  }
+
+  // ── Directory management ─────────────────────────────────────────
+
+  onPickDirectory(): void {
+    this.rootDirService.pickDirectory();
   }
 }
