@@ -243,6 +243,48 @@ async def pick_directory():
     return {"path": datasets_path, "available": available}
 
 
+@router.get("/system/list-directory", tags=["Sistema"])
+async def list_directory(path: str = Query("/app", description="Ruta a listar")):
+    """
+    Lista el contenido de un directorio dentro del contenedor.
+    Devuelve carpetas y archivos con metadatos básicos.
+    """
+    target = Path(path)
+    if not target.is_dir():
+        raise HTTPException(status_code=400, detail=f"No es un directorio válido: {path}")
+
+    items = []
+    try:
+        for entry in sorted(target.iterdir(), key=lambda e: (not e.is_dir(), e.name.lower())):
+            if entry.name.startswith('.'):
+                continue
+            if entry.is_dir():
+                # Contar archivos soportados dentro
+                file_count = sum(1 for _, _, files in os.walk(str(entry))
+                                for f in files if Path(f).suffix.lower() in SUPPORTED_EXTENSIONS)
+                items.append({
+                    "name": entry.name,
+                    "type": "directory",
+                    "path": str(entry),
+                    "fileCount": file_count,
+                })
+            elif entry.suffix.lower() in SUPPORTED_EXTENSIONS:
+                items.append({
+                    "name": entry.name,
+                    "type": "file",
+                    "path": str(entry),
+                    "size": entry.stat().st_size,
+                    "extension": entry.suffix.lower(),
+                })
+    except PermissionError:
+        raise HTTPException(status_code=403, detail=f"Sin permisos para leer: {path}")
+
+    # Obtener la ruta padre para navegación
+    parent = str(target.parent) if str(target) != "/" else None
+
+    return {"current": str(target), "parent": parent, "items": items}
+
+
 from pydantic import BaseModel
 
 class IndexDirectoryRequest(BaseModel):
