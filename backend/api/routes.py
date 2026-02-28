@@ -249,6 +249,19 @@ async def search_documents(
 #  /api/document — Vista detallada de un documento indexado
 # ═══════════════════════════════════════════════════════════════
 
+from fastapi.responses import FileResponse
+
+@router.get("/document/view", tags=["Documentos"])
+async def view_document(source: str = Query(..., description="Ruta del archivo fuente")):
+    """
+    Sirve el archivo original directamente para visualizarlo (PDF, Imagen, etc.).
+    """
+    file_path = Path(source)
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="El archivo original ya no existe en disco.")
+        
+    return FileResponse(path=file_path)
+
 @router.get("/document", tags=["Documentos"])
 async def get_document_detail(source: str = Query(..., description="Ruta del archivo fuente")):
     """

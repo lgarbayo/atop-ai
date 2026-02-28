@@ -1671,8 +1671,16 @@
         if (doc.fileSize) metaHtml += `<span class="dd-badge info">💾 ${formatSize(doc.fileSize)}</span>`;
         $('ddMeta').innerHTML = metaHtml;
 
-        // Render documento completo (texto continuo, sin fragmentar)
-        $('ddBody').innerHTML = `<div class="dd-chunk-text">${esc(doc.fullText)}</div>`;
+        // Render documento original embebido
+        const url = `/api/document/view?source=${encodeURIComponent(source)}`;
+        const isImg = /\.(png|jpg|jpeg|gif)$/i.test(doc.extension);
+        
+        if (isImg) {
+          $('ddBody').innerHTML = `<div style="text-align:center;padding:20px;"><img src="${url}" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>`;
+        } else {
+          $('ddBody').innerHTML = `<iframe src="${url}" style="width:100%;height:100%;min-height:70vh;border:none;border-radius:8px;background:#f5f5f5;"></iframe>`;
+        }
+        $('ddBody').style.padding = '0'; // Remover padding para que el iframe ocupe todo el espacio
 
       } catch (e) {
         $('ddBody').innerHTML = `<div class="fe-empty">⚠️ ${esc(e.message)}</div>`;
