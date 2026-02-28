@@ -31,6 +31,7 @@ services:
       - .:/app
       - upload_data:/app/uploads
       - ../datasets:/app/datasets:ro
+      - ../frontend:/app/frontend:ro
     env_file:
       - .env
     depends_on:

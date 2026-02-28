@@ -216,6 +216,76 @@ async def search_documents(
         )
 
 
+# ═══════════════════════════════════════════════════════════════
+#  /api/system/* — Gestión del sistema (frontend integration)
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/system/pick-directory", tags=["Sistema"])
+async def pick_directory():
+    """
+    En modo Docker no hay picker nativo del SO.
+    Devuelve la ruta del directorio de datasets pre-montado.
+    """
+    datasets_path = "/app/datasets"
+    if not os.path.isdir(datasets_path):
+        datasets_path = "/app/uploads"
+
+    return {"path": datasets_path}
+
+
+from pydantic import BaseModel
+
+class IndexDirectoryRequest(BaseModel):
+    path: str
+
+
+@router.post("/system/index-directory", tags=["Sistema"])
+async def index_directory(request: IndexDirectoryRequest):
+    """
+    Escanea un directorio y dispara tareas de Celery para cada archivo soportado.
+    """
+    dir_path = Path(request.path)
+    if not dir_path.is_dir():
+        raise HTTPException(status_code=400, detail=f"El directorio no existe: {request.path}")
+
+    dispatched = 0
+    for root, _, files in os.walk(str(dir_path)):
+        for filename in files:
+            ext = Path(filename).suffix.lower()
+            if ext in SUPPORTED_EXTENSIONS:
+                file_path = os.path.join(root, filename)
+                process_document.delay(file_path, filename)
+                dispatched += 1
+                logger.info(f"🚀 Tarea disparada para: {filename}")
+
+    logger.info(f"📂 Directorio indexado: {request.path} → {dispatched} archivos")
+    return {"dispatched": dispatched, "path": request.path}
+
+
+@router.delete("/system/database", tags=["Sistema"])
+async def clear_database():
+    """
+    Purga completa de la colección Qdrant. Elimina y recrea vacía.
+    """
+    try:
+        vdb = VectorDBService()
+        # Eliminar colección si existe
+        try:
+            vdb.client.delete_collection(collection_name=vdb.collection_name)
+            logger.info(f"🗑️  Colección '{vdb.collection_name}' eliminada")
+        except Exception:
+            logger.info(f"Colección '{vdb.collection_name}' no existía, creando nueva...")
+
+        # Recrear vacía
+        vdb.ensure_collection()
+        logger.info(f"✅ Colección '{vdb.collection_name}' recreada vacía")
+
+        return {"status": "ok", "message": "Base de datos purgada correctamente"}
+    except Exception as e:
+        logger.error(f"❌ Error purgando la base de datos: {e}")
+        raise HTTPException(status_code=500, detail=f"Error purgando la BD: {e}")
+
+
 def _find_highlights(text: str, query: str) -> list[dict]:
     """
     Busca ocurrencias de la query en el texto para resaltado.

@@ -2,15 +2,17 @@
 main.py — Punto de entrada de FastAPI.
 
 Arranca la aplicación, incluye el router de rutas,
-y expone un health check para verificar que el servidor está vivo.
+sirve el frontend estático, y expone un health check.
 
 Ejecución:
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 """
 
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from api.routes import router
 from services.vector_db import VectorDBService
@@ -30,10 +32,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — permite peticiones desde cualquier frontend (desarrollo)
+# CORS — permite peticiones desde el frontend (mismo origen + desarrollo)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://localhost:8100"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,3 +49,14 @@ app.include_router(router, prefix="/api")
 async def health_check():
     """Verifica que el servidor FastAPI está vivo."""
     return {"status": "ok", "service": "meiga-backend"}
+
+
+# ── Frontend estático ──────────────────────────────────────────
+FRONTEND_PATH = "/app/frontend/index.html"
+
+@app.get("/", tags=["Frontend"])
+async def serve_frontend():
+    """Sirve el frontend estático (index.html)."""
+    if os.path.isfile(FRONTEND_PATH):
+        return FileResponse(FRONTEND_PATH, media_type="text/html")
+    return {"error": "Frontend no encontrado. Monta el volumen frontend/ en Docker."}
