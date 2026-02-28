@@ -108,6 +108,9 @@ class OpenAIProvider(EmbeddingProvider):
         return self._dim
 
 
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
 def get_embedding_provider() -> EmbeddingProvider:
     """
     Factory — instancia el provider según la configuración.
@@ -214,6 +217,9 @@ class VectorDBService:
         Returns:
             Lista de dicts con: text, score, source, y otros metadatos.
         """
+        # Asegurarse de que la colección existe (evita errores 404 si se busca antes de subir nada)
+        self.ensure_collection()
+
         # Vectorizar la query
         query_embedding = self.embedder.embed([query])[0]
 
