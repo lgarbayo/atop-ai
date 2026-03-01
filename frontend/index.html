@@ -1404,6 +1404,9 @@
     <button id="settingsBtn" style="display:none;padding:7px 13px;background:#14213d;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;" onclick="openSettingsModal()">
       &#9881;&#65039; Ajustes LLM
     </button>
+    <button id="logoutBtn" style="padding:7px 13px;background:rgba(20,33,61,.08);color:#14213d;border:none;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;" onclick="logoutUser()">
+      🚪 Cerrar sesión
+    </button>
     <div style="position:relative;" id="fmContainer">
       <button class="fm-trigger" id="fmTriggerBtn" onclick="toggleFmMenu()" aria-label="Gestionar archivos">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -1780,6 +1783,11 @@
         const fm = $('fmContainer'); if (fm) fm.style.display = role === 'admin' ? '' : 'none';
         const sb = $('settingsBtn'); if (sb) sb.style.display = role === 'admin' ? 'inline-flex' : 'none';
       }
+      function logoutUser() {
+        localStorage.removeItem(MEIGA_TOKEN_KEY);
+        localStorage.removeItem(MEIGA_ROLE_KEY);
+        location.reload();
+      }
       $('loginBtn').addEventListener('click', async () => {
         const u = $('loginUser').value.trim(), p = $('loginPass').value;
         const errEl = $('loginError'); if (errEl) errEl.textContent = '';
@@ -1959,8 +1967,8 @@
         $('searchBtn').disabled = true;
         try {
           showToast('Configurando directorio…', 10000);
-          await fetch('/api/system/database', { method: 'DELETE' });
-          const r2 = await fetch('/api/system/index-directory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) });
+          await fetch('/api/system/database', { method: 'DELETE', headers: { 'Authorization': `Bearer ${getToken()}` } });
+          const r2 = await fetch('/api/system/index-directory', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify({ path }) });
           if (!r2.ok) { const err = await r2.json(); throw new Error(err.detail || 'Error indexando') }
           const { dispatched } = await r2.json();
           await dbSet(DIR_KEY, path);
