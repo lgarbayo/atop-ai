@@ -342,6 +342,114 @@ class VectorDBService:
 
         return formatted
 
+    async def text_search(
+        self,
+        query: str,
+        top_k: int = 100,
+        filters: dict = None,
+        range_filters: dict = None,
+        exact_filters: dict = None,
+        role: str = "normal",
+    ) -> list[dict]:
+        """
+        Búsqueda textual exacta (tipo Ctrl+F).
+        Usa scroll + MatchText sobre el índice full-text del campo 'text'.
+        No genera embeddings — es rápida y literal.
+        """
+        await asyncio.to_thread(self.ensure_collection)
+
+        # Construir filtros
+        must_conditions = [
+            FieldCondition(key="text", match=MatchText(text=query))
+        ]
+
+        if filters:
+            should_conditions = []
+            for key, value in filters.items():
+                if not value:
+                    continue
+                if isinstance(value, list):
+                    for v in value:
+                        should_conditions.append(FieldCondition(key=key, match=MatchValue(value=v)))
+                else:
+                    should_conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
+            if should_conditions:
+                must_conditions.append(Filter(should=should_conditions))
+
+        if exact_filters:
+            for key, value in exact_filters.items():
+                if value is not None:
+                    must_conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
+
+        if range_filters:
+            for key, r_val in range_filters.items():
+                gte_val = r_val.get("gte")
+                lte_val = r_val.get("lte")
+                if gte_val is not None or lte_val is not None:
+                    must_conditions.append(
+                        FieldCondition(
+                            key=key,
+                            range=Range(
+                                gte=float(gte_val) if gte_val is not None else None,
+                                lte=float(lte_val) if lte_val is not None else None,
+                            ),
+                        )
+                    )
+
+        # RBAC: excluir docs admin_only para roles no-admin
+        must_not_conditions = []
+        if role != "admin":
+            must_not_conditions.append(
+                FieldCondition(key="visibility", match=MatchValue(value="admin_only"))
+            )
+
+        query_filter = Filter(
+            must=must_conditions,
+            must_not=must_not_conditions if must_not_conditions else None,
+        )
+
+        # Scroll para obtener todos los chunks que contienen el texto
+        all_points = []
+        offset = None
+        while True:
+            result = await asyncio.to_thread(
+                self.client.scroll,
+                collection_name=self.collection_name,
+                scroll_filter=query_filter,
+                limit=100,
+                offset=offset,
+                with_payload=True,
+            )
+            points, next_offset = result
+            all_points.extend(points)
+            if next_offset is None or len(all_points) >= top_k:
+                break
+            offset = next_offset
+
+        # Calcular un score sintético basado en frecuencia de la query en el texto
+        query_lower = query.lower()
+        formatted = []
+        for point in all_points[:top_k]:
+            text = point.payload.get("text", "")
+            # Score = frecuencia normalizada del término en el chunk
+            count = text.lower().count(query_lower)
+            score = min(1.0, count * 0.15 + 0.50) if count > 0 else 0.30
+
+            formatted.append({
+                "text": text,
+                "score": score,
+                "source": point.payload.get("source", "unknown"),
+                "category": point.payload.get("category", "General"),
+                "extension": point.payload.get("extension", ""),
+                "page": point.payload.get("page", None),
+                "chunk_index": point.payload.get("chunk_index", None),
+                "exif_metadata": point.payload.get("exif_metadata", None),
+            })
+
+        # Ordenar por score descendente
+        formatted.sort(key=lambda r: r["score"], reverse=True)
+        return formatted
+
     async def hybrid_search(
         self,
         query: str,

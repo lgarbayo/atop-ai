@@ -165,6 +165,7 @@ async def search_documents(
     top_k: int = Query(30, ge=1, le=1000, description="Número de resultados"),
     type: list[str] = Query(None, description="Filtrar por tipo de documento"),
     expand: bool = Query(False, description="Activar expansión de consulta con LLM"),
+    mode: str = Query("semantic", description="Modo: semantic | text | descriptive"),
     min_size: int = Query(None, ge=0, description="Tamaño mínimo en bytes"),
     max_size: int = Query(None, ge=0, description="Tamaño máximo en bytes"),
     author: str = Query(None, description="Filtrar por autor del documento"),
@@ -173,17 +174,17 @@ async def search_documents(
     current_user: dict = Depends(get_current_user),
 ):
     """
-    Búsqueda semántica sobre los documentos indexados.
+    Búsqueda sobre los documentos indexados.
 
     Modos de búsqueda:
-      1. Normal: Búsqueda directa con la consulta del usuario
-      2. Descriptiva (expand=true): Expande la consulta con LLM local (Qwen2.5-0.5B)
-         para extraer palabras clave técnicas y mejorar resultados
+      1. semantic (defecto): Búsqueda híbrida semántica + léxica
+      2. text: Búsqueda textual exacta (tipo Ctrl+F)
+      3. descriptive (expand=true): Expande la consulta con LLM
 
-    Fallback automático: Si la búsqueda normal no devuelve resultados,
+    Fallback automático: Si la búsqueda semántica no devuelve resultados,
     se activa automáticamente el modo descriptivo.
 
-    Devuelve respuesta en el formato esperado por el frontend Angular:
+    Devuelve respuesta en el formato esperado por el frontend:
     SearchResponse { results, total, page, pageSize, durationMs, queryEchoed }
     """
     try:
@@ -269,29 +270,35 @@ async def search_documents(
             }
 
         vdb = VectorDBService()
-        
-        # 🔍 MODO DE BÚSQUEDA POR PALABRAS CLAVE (KeyBERT)
-        # Estrategia:
-        #   1. Si expand=true → extraer keywords de la query y COMBINAR resultados
-        #      (query original + keywords) para maximizar cobertura hasta top_k
-        #   2. Si expand=false → búsqueda normal; fallback a keywords si no hay resultados
-        #
-        # Nota: KeyBERT extrae el núcleo semántico de la query (no genera términos nuevos),
-        # por eso combinar ambas búsquedas es más efectivo que reemplazar una por otra.
 
-        extracted_keywords = None
-        use_expansion = expand
+        # ── MODO TEXTUAL (Ctrl+F) ─────────────────────────────────
+        if mode == "text":
+            raw_results = await vdb.text_search(
+                query=q,  # usar query original sin normalizar para búsqueda exacta
+                top_k=top_k,
+                filters=filters if filters else None,
+                range_filters=range_filters if range_filters else None,
+                exact_filters=exact_filters if exact_filters else None,
+                role=role,
+            )
+            # Saltar directamente a agrupación (sin expansion ni hybrid)
+            extracted_keywords = None
+            use_expansion = False
+        else:
+            # 🔍 MODO SEMÁNTICO / DESCRIPTIVO
+            extracted_keywords = None
+            use_expansion = expand
 
-        # Búsqueda inicial HÍBRIDA: semántica + léxica en paralelo
-        raw_results = await vdb.hybrid_search(
-            query=q_normalized,
-            query_text=q_normalized,
-            top_k=top_k,
-            filters=filters if filters else None,
-            range_filters=range_filters if range_filters else None,
-            exact_filters=exact_filters if exact_filters else None,
-            role=role,
-        )
+            # Búsqueda inicial HÍBRIDA: semántica + léxica en paralelo
+            raw_results = await vdb.hybrid_search(
+                query=q_normalized,
+                query_text=q_normalized,
+                top_k=top_k,
+                filters=filters if filters else None,
+                range_filters=range_filters if range_filters else None,
+                exact_filters=exact_filters if exact_filters else None,
+                role=role,
+            )
 
         # Activar extracción automáticamente si no hay resultados
         if not raw_results and not use_expansion:
