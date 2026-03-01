@@ -1,3 +1,19 @@
+<!--
+  ======================================================================
+  MEIGA SEARCH — GUÍA NARRATIVA DEL FRONTEND
+  ======================================================================
+  Este archivo es el corazón visual de Meiga Search. Está diseñado como una 
+  Single Page Application (SPA) para garantizar rapidez y fluidez.
+  
+  PARA EL NUEVO DESARROLLADOR:
+  - Todo el código vive en este archivo para evitar latencia de red en carga de módulos.
+  - El diseño usa "Glassmorphism": capas translúcidas que dan profundidad.
+  - El flujo de la app es: LOGIN -> CONFIGURACIÓN (si es primera vez) -> BÚSQUEDA.
+  
+  CONSEJO: Si vas a modificar los estilos, revisa primero los CSS Variables 
+  en :root; ahí definimos la personalidad técnica (Azules) y humana (Ámbar) de la app.
+  ======================================================================
+-->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -13,11 +29,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
+    /* 
+       SISTEMA DE DISEÑO (Design Tokens)
+       ------------------------------------------------------------------
+       Usamos variables para no repetir colores en todo el código.
+       ¿Por qué estos colores?
+       - --text (Azul Medianoche): Transmite seriedad y precisión de búsqueda.
+       - --accent (Ámbar): Resalta lo importante sin ser agresivo (como un marcador).
+       - --bg: El fondo usa un gradiente complejo definido más abajo en body::before.
+    */
     :root {
       --text: #14213d;
+      /* Azul Medianoche para texto principal */
       --accent: #fca311;
+      /* Ámbar para llamadas a la acción y resaltados */
       --surface: #ffffff;
+      /* Fondo de componentes y tarjetas */
       --bg: #e5e5e5;
+      /* Fondo base de la aplicación */
     }
 
     * {
@@ -39,14 +68,12 @@
       position: fixed;
       inset: 0;
       z-index: -1;
-      background: linear-gradient(
-        to top,
-        #050d1a 0%,
-        #0d1f3c 25%,
-        #1a4a7a 50%,
-        #3a7bb8 75%,
-        #6aadd4 100%
-      );
+      background: linear-gradient(to top,
+          #050d1a 0%,
+          #0d1f3c 25%,
+          #1a4a7a 50%,
+          #3a7bb8 75%,
+          #6aadd4 100%);
     }
 
     /* Utility shims (replaces Tailwind CDN) */
@@ -168,24 +195,31 @@
       text-align: center;
     }
 
-    /* Search bar */
+    /* 
+       LA BARRA DE BÚSQUEDA (El componente estrella)
+       ------------------------------------------------------------------
+       Usa 'backdrop-filter: blur' para que el fondo de la página se vea 
+       desenfocado por detrás, dando un efecto de "cristal esmerilado".
+       Las esquinas asimétricas (20px 4px) son nuestra firma visual.
+    */
     .search-bar-wrapper {
       display: flex;
       align-items: center;
       width: 100%;
-      background: rgba(255,255,255,.25);
+      background: rgba(255, 255, 255, .25);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1.5px solid rgba(255,255,255,.45);
+      border: 1.5px solid rgba(255, 255, 255, .45);
       border-radius: 20px 4px 20px 4px;
+      /* Estilo de esquinas asimétricas característico */
       padding: 0 12px 0 22px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .08);
       transition: box-shadow .2s ease, border-color .2s;
     }
 
     .search-bar-wrapper:focus-within {
-      box-shadow: 0 0 0 2.5px var(--accent), 0 4px 24px rgba(0,0,0,.1);
-      border-color: rgba(255,255,255,.6);
+      box-shadow: 0 0 0 2.5px var(--accent), 0 4px 24px rgba(0, 0, 0, .1);
+      border-color: rgba(255, 255, 255, .6);
     }
 
     #searchInput {
@@ -203,7 +237,7 @@
     #searchInput::placeholder {
       font-family: 'Times New Roman', Georgia, serif;
       font-style: italic;
-      color: rgba(255,255,255,.75);
+      color: rgba(255, 255, 255, .75);
     }
 
     #searchInput:disabled {
@@ -215,7 +249,7 @@
     .mode-toggle {
       display: inline-flex;
       align-items: center;
-      background: rgba(255,255,255,.1);
+      background: rgba(255, 255, 255, .1);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-radius: 20px 4px 20px 4px;
@@ -231,7 +265,7 @@
       border: none;
       border-radius: 16px 3px 16px 3px;
       background: transparent;
-      color: rgba(255,255,255,.85);
+      color: rgba(255, 255, 255, .85);
       cursor: pointer;
       font-family: 'Inter', 'Roboto', sans-serif;
       font-size: .82rem;
@@ -248,7 +282,7 @@
     }
 
     .mode-btn:hover:not(.active) {
-      background: rgba(255,255,255,.15);
+      background: rgba(255, 255, 255, .15);
       color: #fff;
     }
 
@@ -257,9 +291,9 @@
       align-items: center;
       gap: 8px;
       padding: 8px 16px;
-      border: 1px solid rgba(255,255,255,.2);
+      border: 1px solid rgba(255, 255, 255, .2);
       border-radius: 20px 4px 20px 4px;
-      background: rgba(255,255,255,.1);
+      background: rgba(255, 255, 255, .1);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       color: #fff;
@@ -267,15 +301,15 @@
       font-size: .85rem;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
       transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .filter-btn:hover {
-      background: rgba(255,255,255,.2);
-      border-color: rgba(255,255,255,.35);
+      background: rgba(255, 255, 255, .2);
+      border-color: rgba(255, 255, 255, .35);
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0,0,0,.12);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
     }
 
     .filter-btn--active {
@@ -522,7 +556,7 @@
       letter-spacing: .08em;
       text-transform: uppercase;
       color: #fff;
-      text-shadow: 0 1px 3px rgba(0,0,0,.15);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .15);
     }
 
     .clear-all-btn {
@@ -530,7 +564,7 @@
       border: none;
       font-size: .75rem;
       font-weight: 700;
-      color: rgba(255,255,255,.7);
+      color: rgba(255, 255, 255, .7);
       cursor: pointer;
       padding: 0;
       font-family: 'Inter', 'Roboto', sans-serif;
@@ -547,8 +581,8 @@
       gap: 10px;
       padding: 10px 16px;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.2);
-      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255, 255, 255, .2);
+      background: rgba(255, 255, 255, .12);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       cursor: pointer;
@@ -557,8 +591,8 @@
     }
 
     .recent-item:hover {
-      background: rgba(255,255,255,.25);
-      border-color: rgba(255,255,255,.35);
+      background: rgba(255, 255, 255, .25);
+      border-color: rgba(255, 255, 255, .35);
       transform: translateY(-1px);
     }
 
@@ -567,7 +601,7 @@
     }
 
     .item-icon {
-      color: rgba(255,255,255,.5);
+      color: rgba(255, 255, 255, .5);
       flex-shrink: 0;
     }
 
@@ -601,10 +635,10 @@
 
     /* Result card */
     .result-card {
-      background: rgba(255,255,255,.12);
+      background: rgba(255, 255, 255, .12);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,.18);
+      border: 1px solid rgba(255, 255, 255, .18);
       border-radius: 16px 4px 16px 4px;
       padding: 18px 22px;
       cursor: pointer;
@@ -615,7 +649,7 @@
     .result-card:hover,
     .result-card:focus-visible {
       box-shadow: 0 4px 18px rgba(0, 0, 0, .15);
-      background: rgba(255,255,255,.2);
+      background: rgba(255, 255, 255, .2);
       transform: translateY(-1px);
     }
 
@@ -645,7 +679,7 @@
 
     .fragment {
       font-size: .85rem;
-      color: rgba(255,255,255,.85);
+      color: rgba(255, 255, 255, .85);
       line-height: 1.65;
       margin: 0 0 14px;
     }
@@ -692,6 +726,7 @@
       box-shadow: 0 8px 40px rgba(20, 33, 61, .18);
       position: relative;
     }
+
     .picker-close-btn {
       position: absolute;
       top: 16px;
@@ -706,6 +741,7 @@
       padding: 4px;
       transition: color .2s, transform .2s;
     }
+
     .picker-close-btn:hover {
       color: var(--text);
       transform: scale(1.1);
@@ -1341,87 +1377,430 @@
 
     /* ── Document Chat Panel ──────────────────── */
     .dd-chat-toggle {
-      display: flex; align-items: center; gap: 6px;
-      padding: 5px 12px; border-radius: 6px;
-      background: #fca311; border: none; cursor: pointer;
-      font-size: 0.8rem; font-weight: 700; color: #14213d;
-      white-space: nowrap; flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: #fca311;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #14213d;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .dd-chat-toggle:hover { opacity: 0.85; }
+
+    .dd-chat-toggle:hover {
+      opacity: 0.85;
+    }
+
     .dd-chat-messages {
-      display: flex; flex-direction: column; gap: 8px;
-      max-height: 200px; overflow-y: auto; padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 4px;
     }
+
     .dd-chat-bubble {
-      padding: 8px 12px; border-radius: 10px;
-      font-size: 0.875rem; line-height: 1.55; max-width: 88%; word-break: break-word;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      line-height: 1.55;
+      max-width: 88%;
+      word-break: break-word;
     }
-    .dd-chat-bubble--user { background: #fca311; color: #14213d; align-self: flex-end; }
-    .dd-chat-bubble--ai   { background: #fff; border: 1px solid rgba(20,33,61,.1); color: #14213d; align-self: flex-start; }
-    .dd-chat-bubble--loading { color: rgba(20,33,61,.4); font-style: italic; align-self: flex-start; }
+
+    .dd-chat-bubble--user {
+      background: #fca311;
+      color: #14213d;
+      align-self: flex-end;
+    }
+
+    .dd-chat-bubble--ai {
+      background: #fff;
+      border: 1px solid rgba(20, 33, 61, .1);
+      color: #14213d;
+      align-self: flex-start;
+    }
+
+    .dd-chat-bubble--loading {
+      color: rgba(20, 33, 61, .4);
+      font-style: italic;
+      align-self: flex-start;
+    }
+
     .dd-chat-input {
-      flex: 1; padding: .6rem .9rem;
-      border: 1.5px solid #d1d5db; border-radius: 8px;
-      font-size: .875rem; outline: none; color: #14213d; background: #fff;
+      flex: 1;
+      padding: .6rem .9rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: .875rem;
+      outline: none;
+      color: #14213d;
+      background: #fff;
     }
-    .dd-chat-input:focus { border-color: #fca311; }
+
+    .dd-chat-input:focus {
+      border-color: #fca311;
+    }
+
     .dd-chat-send {
-      padding: .6rem 1.1rem; background: #fca311; border: none;
-      border-radius: 8px; font-weight: 700; font-size: .875rem;
-      color: #14213d; cursor: pointer; white-space: nowrap;
+      padding: .6rem 1.1rem;
+      background: #fca311;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: .875rem;
+      color: #14213d;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    .dd-chat-send:disabled { opacity: .45; cursor: not-allowed; }
+
+    .dd-chat-send:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
     /* ── Settings modal ──────────────────────────────────────────── */
-    dialog.settings-dialog { border: none; border-radius: 16px; padding: 2rem; width: 100%; max-width: 420px; box-shadow: 0 8px 40px rgba(0,0,0,.2); }
-    dialog.settings-dialog::backdrop { background: rgba(0,0,0,.5); }
-    .settings-dialog h2 { margin: 0 0 1.5rem; font-size: 1.2rem; font-weight: 700; color: #14213d; }
-    .settings-dialog label { display: block; font-size: .78rem; font-weight: 600; color: rgba(20,33,61,.55); margin-bottom: .3rem; margin-top: .9rem; text-transform: uppercase; letter-spacing: .4px; }
-    .settings-dialog select, .settings-dialog input[type=text], .settings-dialog input[type=password] { width: 100%; padding: .6rem .85rem; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: .9rem; color: #14213d; outline: none; box-sizing: border-box; }
-    .settings-dialog select:focus, .settings-dialog input:focus { border-color: #fca311; }
-    .settings-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
-    .settings-btn-cancel { padding: .6rem 1.2rem; border: 1.5px solid #d1d5db; background: #fff; border-radius: 8px; font-size: .875rem; cursor: pointer; color: #14213d; }
-    .settings-btn-save { padding: .6rem 1.2rem; background: #fca311; border: none; border-radius: 8px; font-weight: 700; font-size: .875rem; color: #14213d; cursor: pointer; }
+    dialog.settings-dialog {
+      border: none;
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .2);
+    }
+
+    dialog.settings-dialog::backdrop {
+      background: rgba(0, 0, 0, .5);
+    }
+
+    .settings-dialog h2 {
+      margin: 0 0 1.5rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #14213d;
+    }
+
+    .settings-dialog label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      color: rgba(20, 33, 61, .55);
+      margin-bottom: .3rem;
+      margin-top: .9rem;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    .settings-dialog select,
+    .settings-dialog input[type=text],
+    .settings-dialog input[type=password] {
+      width: 100%;
+      padding: .6rem .85rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: .9rem;
+      color: #14213d;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .settings-dialog select:focus,
+    .settings-dialog input:focus {
+      border-color: #fca311;
+    }
+
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 1.5rem;
+    }
+
+    .settings-btn-cancel {
+      padding: .6rem 1.2rem;
+      border: 1.5px solid #d1d5db;
+      background: #fff;
+      border-radius: 8px;
+      font-size: .875rem;
+      cursor: pointer;
+      color: #14213d;
+    }
+
+    .settings-btn-save {
+      padding: .6rem 1.2rem;
+      background: #fca311;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: .875rem;
+      color: #14213d;
+      cursor: pointer;
+    }
+
     /* ── Summary panel ───────────────────────────────────────────── */
-    .dd-summary-panel { display: none; flex-direction: column; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid rgba(20,33,61,.08); background: #f0f4ff; }
-    .dd-summary-text { font-size: .875rem; line-height: 1.65; color: #334155; white-space: pre-wrap; }
-    .dd-summary-loading { display: flex; align-items: center; gap: 8px; color: rgba(20,33,61,.5); font-size: .85rem; }
+    .dd-summary-panel {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px 24px 20px;
+      border-top: 1px solid rgba(20, 33, 61, .08);
+      background: #f0f4ff;
+    }
+
+    .dd-summary-text {
+      font-size: .875rem;
+      line-height: 1.65;
+      color: #334155;
+      white-space: pre-wrap;
+    }
+
+    .dd-summary-loading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(20, 33, 61, .5);
+      font-size: .85rem;
+    }
 
     /* ── Global Chat ─────────────────────────────────────────────── */
-    .global-chat-btn { position: fixed; top: 24px; left: 24px; width: 56px; height: 56px; border-radius: 50%; background: #14213d; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(20,33,61,.3); cursor: pointer; z-index: 1000; border: none; transition: transform .2s, background .2s; }
-    .global-chat-btn:hover { transform: scale(1.05); background: #fca311; }
-    .global-chat-panel { position: fixed; top: 0; left: 0; width: 420px; height: 100vh; max-height: 100vh; background: #fff; box-shadow: 4px 0 32px rgba(20,33,61,.2); display: none; flex-direction: column; z-index: 1001; overflow: hidden; border-right: 1px solid rgba(20,33,61,.08); }
-    .global-chat-header { padding: 16px 20px; background: #050d1a; color: white; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1rem; border-bottom: 2px solid #fca311; }
-    .global-chat-close { background: none; border: none; color: rgba(255,255,255,.7); cursor: pointer; padding: 4px; display: flex; transition: color .2s; }
-    .global-chat-close:hover { color: #fca311; }
-    .global-chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; background: #e8f4fc; }
-    .global-chat-msg { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: .9rem; line-height: 1.5; word-wrap: break-word; }
-    .global-chat-msg.user { align-self: flex-end; background: #0d1f3c; color: white; font-weight: 500; border-bottom-right-radius: 4px; }
-    .global-chat-msg.bot { align-self: flex-start; background: white; color: #14213d; border: 1px solid rgba(20,33,61,.08); border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-    .global-chat-msg.bot pre { background: #f1f5f9; padding: 10px; border-radius: 6px; overflow-x: auto; margin: 8px 0; font-size: .8rem; }
-    .global-chat-msg.bot code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-    .global-chat-sources { margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(20,33,61,.1); font-size: .75rem; color: #64748b; }
-    .global-chat-sources span { display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin: 2px; }
-    .global-chat-input-area { padding: 16px; background: white; border-top: 1px solid rgba(20,33,61,.08); display: flex; gap: 8px; }
-    .global-chat-input { flex: 1; padding: 10px 14px; border: 1.5px solid #a8d4f0; border-radius: 20px; font-size: .9rem; outline: none; transition: border-color .2s; }
-    .global-chat-input:focus { border-color: #fca311; }
-    .global-chat-send { background: #0d1f3c; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .2s, transform .1s; flex-shrink: 0; }
-    .global-chat-send:hover:not(:disabled) { background: #fca311; transform: scale(1.05); }
-    .global-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
-    .global-chat-typing { display: flex; gap: 4px; padding: 12px 16px; align-items: center; height: 16px; }
-    .global-chat-typing span { width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
-    .global-chat-typing span:nth-child(1) { animation-delay: -0.32s; }
-    .global-chat-typing span:nth-child(2) { animation-delay: -0.16s; }
-    @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    .global-chat-btn {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #14213d;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(20, 33, 61, .3);
+      cursor: pointer;
+      z-index: 1000;
+      border: none;
+      transition: transform .2s, background .2s;
+    }
+
+    .global-chat-btn:hover {
+      transform: scale(1.05);
+      background: #fca311;
+    }
+
+    .global-chat-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 420px;
+      height: 100vh;
+      max-height: 100vh;
+      background: #fff;
+      box-shadow: 4px 0 32px rgba(20, 33, 61, .2);
+      display: none;
+      flex-direction: column;
+      z-index: 1001;
+      overflow: hidden;
+      border-right: 1px solid rgba(20, 33, 61, .08);
+    }
+
+    .global-chat-header {
+      padding: 16px 20px;
+      background: #050d1a;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 1rem;
+      border-bottom: 2px solid #fca311;
+    }
+
+    .global-chat-close {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, .7);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      transition: color .2s;
+    }
+
+    .global-chat-close:hover {
+      color: #fca311;
+    }
+
+    .global-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #e8f4fc;
+    }
+
+    .global-chat-msg {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: .9rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .global-chat-msg.user {
+      align-self: flex-end;
+      background: #0d1f3c;
+      color: white;
+      font-weight: 500;
+      border-bottom-right-radius: 4px;
+    }
+
+    .global-chat-msg.bot {
+      align-self: flex-start;
+      background: white;
+      color: #14213d;
+      border: 1px solid rgba(20, 33, 61, .08);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+    }
+
+    .global-chat-msg.bot pre {
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 8px 0;
+      font-size: .8rem;
+    }
+
+    .global-chat-msg.bot code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .global-chat-sources {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(20, 33, 61, .1);
+      font-size: .75rem;
+      color: #64748b;
+    }
+
+    .global-chat-sources span {
+      display: inline-block;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin: 2px;
+    }
+
+    .global-chat-input-area {
+      padding: 16px;
+      background: white;
+      border-top: 1px solid rgba(20, 33, 61, .08);
+      display: flex;
+      gap: 8px;
+    }
+
+    .global-chat-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid #a8d4f0;
+      border-radius: 20px;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .global-chat-input:focus {
+      border-color: #fca311;
+    }
+
+    .global-chat-send {
+      background: #0d1f3c;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      flex-shrink: 0;
+    }
+
+    .global-chat-send:hover:not(:disabled) {
+      background: #fca311;
+      transform: scale(1.05);
+    }
+
+    .global-chat-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .global-chat-typing {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+      align-items: center;
+      height: 16px;
+    }
+
+    .global-chat-typing span {
+      width: 6px;
+      height: 6px;
+      background: #cbd5e1;
+      border-radius: 50%;
+      animation: typing 1.4s infinite ease-in-out both;
+    }
+
+    .global-chat-typing span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .global-chat-typing span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes typing {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1);
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- Global Chat UI -->
+  <!-- 
+       SECCIÓN 1: ASISTENTE DE IA GLOBAL (RAG)
+       ------------------------------------------------------------------
+       Este panel es el "Cerebro" de la app. Permite preguntar cosas como 
+       "¿Qué dicen mis documentos sobre X?". 
+       RAG significa que la IA leerá TUS archivos antes de responder.
+  -->
+  <!-- El botón flotante que siempre está visible en la esquina -->
   <button class="global-chat-btn" id="globalChatBtn" onclick="toggleGlobalChat()" aria-label="Abrir asistente global">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-      <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
-      <path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9.06 9.06 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.437 10.437 0 0 1-.524 2.318l-.003.011a10.722 10.722 0 0 1-.244.637c-.079.186.074.394.273.362a21.673 21.673 0 0 0 .693-.125zm.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6-3.004 6-7 6a8.06 8.06 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a10.97 10.97 0 0 0 .398-2z"/>
+      <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+      <path
+        d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9.06 9.06 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.437 10.437 0 0 1-.524 2.318l-.003.011a10.722 10.722 0 0 1-.244.637c-.079.186.074.394.273.362a21.673 21.673 0 0 0 .693-.125zm.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6-3.004 6-7 6a8.06 8.06 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a10.97 10.97 0 0 0 .398-2z" />
     </svg>
   </button>
 
@@ -1430,29 +1809,39 @@
       <div>Asistente Global</div>
       <button class="global-chat-close" onclick="toggleGlobalChat()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          <path
+            d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
         </svg>
       </button>
     </div>
     <div class="global-chat-messages" id="globalChatMessages">
       <div class="global-chat-msg bot">
-        Hola, puedo buscar en toda nuestra base documental y responder a tus preguntas sintetizando la información. ¿Qué necesitas saber?
+        Hola, puedo buscar en toda nuestra base documental y responder a tus preguntas sintetizando la información. ¿Qué
+        necesitas saber?
       </div>
     </div>
     <form class="global-chat-input-area" onsubmit="submitGlobalChat(event)">
-      <input type="text" id="globalChatInput" class="global-chat-input" placeholder="Pregunta algo sobre los documentos..." autocomplete="off">
+      <input type="text" id="globalChatInput" class="global-chat-input"
+        placeholder="Pregunta algo sobre los documentos..." autocomplete="off">
       <button type="submit" id="globalChatSend" class="global-chat-send" disabled>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/>
+          <path
+            d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z" />
         </svg>
       </button>
     </form>
-  </div>  <!-- LOGIN MODAL -->
-  <div id="loginModal" style="position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);">
-    <div style="background:#ffffff;border-radius:16px;padding:2.5rem 2.5rem 2rem;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,.2);display:flex;flex-direction:column;align-items:center;gap:1rem;">
+  </div> <!-- ── MODAL DE AUTENTICACIÓN ────────────────────────────────────────── 
+       Puerta de acceso a la aplicación. Gestiona el login inicial 
+       y la persistencia del token JWT.
+  ────────────────────────────────────────────────────────────────────── -->
+  <div id="loginModal"
+    style="position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);">
+    <div
+      style="background:#ffffff;border-radius:16px;padding:2.5rem 2.5rem 2rem;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,.2);display:flex;flex-direction:column;align-items:center;gap:1rem;">
       <img src="assets/meiga-logo.svg" alt="Meiga" style="width:56px;height:56px;">
       <h2 style="margin:0;font-size:1.5rem;font-weight:700;color:#14213d;">Iniciar sesión</h2>
-      <p style="margin:0;font-size:.875rem;color:#555;text-align:center;">Accede a Meiga Search con tus credenciales corporativas</p>
+      <p style="margin:0;font-size:.875rem;color:#555;text-align:center;">Accede a Meiga Search con tus credenciales
+        corporativas</p>
       <input id="loginUser" type="text" placeholder="Usuario" autocomplete="username"
         style="width:100%;padding:.65rem .9rem;border:1.5px solid #d1d5db;border-radius:8px;font-size:.95rem;outline:none;color:#14213d;" />
       <input id="loginPass" type="password" placeholder="Contraseña" autocomplete="current-password"
@@ -1461,7 +1850,8 @@
         style="width:100%;padding:.7rem;background:#fca311;color:#14213d;font-weight:700;font-size:1rem;border:none;border-radius:8px;cursor:pointer;">
         Entrar
       </button>
-      <p id="loginError" style="display:none;margin:0;font-size:.85rem;color:#dc2626;">Usuario o contraseña incorrectos</p>
+      <p id="loginError" style="display:none;margin:0;font-size:.85rem;color:#dc2626;">Usuario o contraseña incorrectos
+      </p>
     </div>
   </div>
 
@@ -1482,30 +1872,37 @@
   <!-- ROOT DIRECTORY PICKER OVERLAY -->
   <div class="picker-backdrop" id="pickerOverlay" style="display:none">
     <div class="picker-card">
-      <button class="picker-close-btn" aria-label="Cerrar" onclick="document.getElementById('pickerOverlay').style.display='none'">
+      <button class="picker-close-btn" aria-label="Cerrar"
+        onclick="document.getElementById('pickerOverlay').style.display='none'">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          <path
+            d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
         </svg>
       </button>
       <div class="picker-icon-wrap">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#fca311" viewBox="0 0 16 16">
-          <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-          <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+          <path
+            d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+          <path
+            d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
         </svg>
       </div>
       <h2 class="picker-title">Sube tus documentos</h2>
-      <p class="picker-desc">Selecciona una carpeta o archivos desde tu dispositivo para indexarlos en Meiga Search. Formatos admitidos: PDF, DOCX, PPTX, TXT, CSV, XLSX, JSON, XML, MD, HTML, PNG, JPG.</p>
+      <p class="picker-desc">Selecciona una carpeta o archivos desde tu dispositivo para indexarlos en Meiga Search.
+        Formatos admitidos: PDF, DOCX, PPTX, TXT, CSV, XLSX, JSON, XML, MD, HTML, PNG, JPG.</p>
 
       <!-- Inputs nativos del navegador (invisible, se disparan por los botones) -->
       <input type="file" id="pickerFolderInput" webkitdirectory multiple style="display:none"
         onchange="handlePickedFiles(this.files)">
-      <input type="file" id="pickerFileInput" multiple accept=".pdf,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.docx,.pptx,.json,.xml,.md,.html" style="display:none"
+      <input type="file" id="pickerFileInput" multiple
+        accept=".pdf,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.docx,.pptx,.json,.xml,.md,.html" style="display:none"
         onchange="handlePickedFiles(this.files)">
 
       <!-- Primario: seleccionar carpeta entera -->
       <button class="picker-btn" id="pickerBtn" onclick="document.getElementById('pickerFolderInput').click()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.12 1.349l.459 1.025H13.5A1.5 1.5 0 0 1 15 5.914V12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9z"/>
+          <path
+            d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.12 1.349l.459 1.025H13.5A1.5 1.5 0 0 1 15 5.914V12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9z" />
         </svg>
         <span id="pickerBtnLabel">Seleccionar carpeta</span>
       </button>
@@ -1515,14 +1912,16 @@
         style="background:transparent;color:var(--text);border:1.5px solid rgba(20,33,61,.18);margin-top:-4px;"
         onclick="document.getElementById('pickerFileInput').click()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2L9.5 1.5z"/>
+          <path
+            d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2L9.5 1.5z" />
         </svg>
         <span>Seleccionar archivos</span>
       </button>
 
       <p class="picker-hint" id="pickerHint" style="display:none">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#fca311" viewBox="0 0 16 16">
-          <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+          <path
+            d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
         </svg>
         Algunos archivos no pudieron subirse. Comprueba el formato y vuelve a intentarlo.
       </p>
@@ -1530,7 +1929,8 @@
   </div>
 
   <!-- FILE MANAGER — fixed top-right (hidden until authenticated) -->
-  <div id="topBar" style="position:fixed;top:16px;right:20px;z-index:300;display:none;flex-direction:column;align-items:flex-end;gap:8px;">
+  <div id="topBar"
+    style="position:fixed;top:16px;right:20px;z-index:300;display:none;flex-direction:column;align-items:flex-end;gap:8px;">
     <!-- Fila 1: Ajustes, Gestionar archivos, Cerrar sesión -->
     <div style="display:flex;gap:8px;align-items:center;">
       <button id="settingsBtn" class="fm-trigger" style="display:none;" onclick="openSettingsModal()">
@@ -1565,8 +1965,10 @@
 
           <button class="fm-action-btn" onclick="doPickDirectory()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-              <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+              <path
+                d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+              <path
+                d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
             </svg>
             <span>Subir más archivos</span>
           </button>
@@ -1591,9 +1993,13 @@
 
     <!-- Fila 2: Subir archivo + Home -->
     <div style="display:flex;gap:8px;align-items:center;">
-      <input id="uploadInput" type="file" style="display:none" accept=".pdf,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.docx,.pptx,.json,.xml,.md,.html"
+      <input id="uploadInput" type="file" style="display:none"
+        accept=".pdf,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.docx,.pptx,.json,.xml,.md,.html"
         onchange="if(this.files[0]) uploadDocument(this.files[0])" />
-      <button id="homeBtn" onclick="resetSearchState()" style="display:none; background:rgba(255,255,255,0.85); backdrop-filter:blur(8px); border:1px solid rgba(20,33,61,0.1); border-radius:12px; padding:8px 14px; cursor:pointer; align-items:center; gap:8px; transition:all .2s ease; box-shadow:0 2px 8px rgba(20,33,61,0.08);" onmouseover="this.style.background='rgba(20,33,61,0.06)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(20,33,61,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.85)';this.style.transform='none';this.style.boxShadow='0 2px 8px rgba(20,33,61,0.08)'">
+      <button id="homeBtn" onclick="resetSearchState()"
+        style="display:none; background:rgba(255,255,255,0.85); backdrop-filter:blur(8px); border:1px solid rgba(20,33,61,0.1); border-radius:12px; padding:8px 14px; cursor:pointer; align-items:center; gap:8px; transition:all .2s ease; box-shadow:0 2px 8px rgba(20,33,61,0.08);"
+        onmouseover="this.style.background='rgba(20,33,61,0.06)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(20,33,61,0.12)'"
+        onmouseout="this.style.background='rgba(255,255,255,0.85)';this.style.transform='none';this.style.boxShadow='0 2px 8px rgba(20,33,61,0.08)'">
         <img src="assets/home-1-svgrepo-com.svg" alt="Home" style="width:24px;height:24px;" />
       </button>
     </div>
@@ -1615,7 +2021,7 @@
         <span
           style="font-family:'Times New Roman',Georgia,serif;font-style:italic;font-size:1.1rem;color:#fca311;letter-spacing:0.2em;font-weight:700;margin-top:-8px;text-shadow:0 1px 4px rgba(0,0,0,.25);">search</span>
       </div>
-      
+
       <!-- Search bar -->
       <div class="search-bar-wrapper w-full">
         <input id="searchInput" type="text" placeholder="What document or functionality do you need?" autocomplete="off"
@@ -1641,7 +2047,8 @@
         </button>
         <button class="mode-btn" id="modeTextBtn" onclick="setMode('text')" type="button">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M2.244 13.081l.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.716-.43 2.078-1.011zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z"/>
+            <path
+              d="M2.244 13.081l.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.716-.43 2.078-1.011zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z" />
           </svg>
           <span>Búsqueda textual</span>
         </button>
@@ -1757,7 +2164,8 @@
         </div>
         <!-- Query Expansion Info removed (descriptive search removed) -->
         <p id="resultsMeta"
-          style="display:none;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.8);margin:0;padding-bottom: 12px;"></p>
+          style="display:none;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.8);margin:0;padding-bottom: 12px;">
+        </p>
         <div id="resultsList" class="flex flex-col gap-3" style="display:none"></div>
         <div id="paginationContainer" style="display:none; justify-content:center; padding: 10px 0;">
           <button id="loadMoreBtn" class="filter-btn" onclick="loadMoreResults()">
@@ -1796,18 +2204,22 @@
           style="padding: 20px 28px; border-top: 1px solid rgba(20,33,61,0.08); background: #f9fafb; display: none; overflow-y: auto; max-height: 250px;">
         </div>
         <div class="dd-source" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-          <span class="dd-source-path" id="ddSource" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+          <span class="dd-source-path" id="ddSource"
+            style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
           <div style="display:flex;gap:6px;flex-shrink:0;">
             <button class="dd-chat-toggle" id="ddSummaryToggle" onclick="toggleDocSummary()">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                <path d="M4.5 11.5A.5.5 0 0 1 5 11h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 9h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 7h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/>
+                <path
+                  d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                <path
+                  d="M4.5 11.5A.5.5 0 0 1 5 11h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 9h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 7h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm0-2A.5.5 0 0 1 5 5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z" />
               </svg>
               Resumen
             </button>
             <button class="dd-chat-toggle" id="ddChatToggle" onclick="toggleDocChat()">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894"/>
+                <path
+                  d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894" />
               </svg>
               Preguntar
             </button>
@@ -1815,17 +2227,25 @@
         </div>
         <!-- Summary panel -->
         <div id="ddSummaryPanel" class="dd-summary-panel">
-          <p style="margin:0 0 4px;font-size:.75rem;font-weight:700;color:rgba(20,33,61,.45);text-transform:uppercase;letter-spacing:.5px;">&#128196; Resumen del documento</p>
+          <p
+            style="margin:0 0 4px;font-size:.75rem;font-weight:700;color:rgba(20,33,61,.45);text-transform:uppercase;letter-spacing:.5px;">
+            &#128196; Resumen del documento</p>
           <div id="ddSummaryContent">
-            <div class="dd-summary-loading"><div class="spinner" style="width:16px;height:16px;"></div> Generando resumen…</div>
+            <div class="dd-summary-loading">
+              <div class="spinner" style="width:16px;height:16px;"></div> Generando resumen…
+            </div>
           </div>
         </div>
         <!-- Chat con el documento -->
-        <div id="ddChat" style="display:none;border-top:1px solid rgba(20,33,61,.08);padding:16px 24px 20px;background:#f9fafb;flex-direction:column;gap:10px;">
-          <p style="margin:0;font-size:.75rem;font-weight:700;color:rgba(20,33,61,.45);text-transform:uppercase;letter-spacing:.5px;">&#x1F4AC; Pregunta al documento</p>
+        <div id="ddChat"
+          style="display:none;border-top:1px solid rgba(20,33,61,.08);padding:16px 24px 20px;background:#f9fafb;flex-direction:column;gap:10px;">
+          <p
+            style="margin:0;font-size:.75rem;font-weight:700;color:rgba(20,33,61,.45);text-transform:uppercase;letter-spacing:.5px;">
+            &#x1F4AC; Pregunta al documento</p>
           <div class="dd-chat-messages" id="ddChatMessages"></div>
           <div style="display:flex;gap:8px;">
-            <input id="ddChatInput" class="dd-chat-input" type="text" placeholder="Escribe tu pregunta sobre este documento…" />
+            <input id="ddChatInput" class="dd-chat-input" type="text"
+              placeholder="Escribe tu pregunta sobre este documento…" />
             <button id="ddChatSend" class="dd-chat-send" onclick="sendChatMessage()">Enviar</button>
           </div>
         </div>
@@ -1847,7 +2267,8 @@
         <input id="settingsApiKey" type="password" placeholder="sk-… / AIza…" autocomplete="off" />
       </div>
       <div id="settingsModelRow" style="display:none;">
-        <label for="settingsModel">Modelo personalizado <span style="font-weight:400;text-transform:none;">(opcional)</span></label>
+        <label for="settingsModel">Modelo personalizado <span
+            style="font-weight:400;text-transform:none;">(opcional)</span></label>
         <input id="settingsModel" type="text" placeholder="gpt-4o / gemini-1.5-pro / claude-3-5-sonnet…" />
       </div>
       <div class="settings-actions">
@@ -1857,16 +2278,26 @@
     </dialog>
 
     <!-- UPLOAD PROGRESS MODAL -->
-    <div id="uploadProgressModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(20,33,61,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;">
-      <div style="background:#fff;border-radius:22px 6px 22px 6px;border:1.5px solid rgba(20,33,61,.14);padding:2rem 2rem 1.75rem;width:100%;max-width:440px;box-shadow:0 12px 48px rgba(20,33,61,.22);display:flex;flex-direction:column;gap:1.1rem;">
+    <div id="uploadProgressModal"
+      style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(20,33,61,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;">
+      <div
+        style="background:#fff;border-radius:22px 6px 22px 6px;border:1.5px solid rgba(20,33,61,.14);padding:2rem 2rem 1.75rem;width:100%;max-width:440px;box-shadow:0 12px 48px rgba(20,33,61,.22);display:flex;flex-direction:column;gap:1.1rem;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#fca311" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
-          <h3 id="uploadProgressTitle" style="margin:0;font-size:1.05rem;font-weight:700;color:#14213d;flex:1;">Subiendo archivos…</h3>
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#fca311" viewBox="0 0 16 16">
+            <path
+              d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+            <path
+              d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+          </svg>
+          <h3 id="uploadProgressTitle" style="margin:0;font-size:1.05rem;font-weight:700;color:#14213d;flex:1;">Subiendo
+            archivos…</h3>
         </div>
         <div style="background:rgba(20,33,61,.08);border-radius:99px;height:7px;overflow:hidden;">
-          <div id="uploadProgressFill" style="height:100%;background:#fca311;border-radius:99px;width:0%;transition:width .25s ease;"></div>
+          <div id="uploadProgressFill"
+            style="height:100%;background:#fca311;border-radius:99px;width:0%;transition:width .25s ease;"></div>
         </div>
-        <div style="font-size:.85rem;color:rgba(20,33,61,.65);display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;">
+        <div
+          style="font-size:.85rem;color:rgba(20,33,61,.65);display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;">
           <span id="uploadProgressCount" style="font-weight:700;color:#14213d;"></span>
           <span id="uploadProgressCurrent" style="word-break:break-all;"></span>
         </div>
@@ -1881,7 +2312,24 @@
     <div id="toast"></div>
 
     <script>
-      /* ── IndexedDB (mirrors root-directory.service.ts) ─────── */
+      /**
+       * ======================================================================
+       * LÓGICA DE LA APLICACIÓN (EL MOTOR DEL FRONTEND)
+       * ======================================================================
+       * El código está organizado cronológicamente según el ciclo de vida de la app:
+       * 
+       * 1. PERSISTENCIA (IndexedDB): Para que la app "recuerde" dónde están tus archivos.
+       * 2. ESTADO GLOBAL: El panel de control de lo que el usuario está viendo.
+       * 3. SEGURIDAD (Auth/RBAC): Quién eres y qué tienes permiso de hacer.
+       * 4. BÚSQUEDA: Cómo hablamos con el backend para encontrar documentos.
+       * 5. IA/CHAT: La magia de RAG para resumir y responder preguntas.
+       * ======================================================================
+       */
+
+      /* ── Persistencia Local (IndexedDB) ─────────────────────── 
+         Se prefiere sobre localStorage para estructuras de datos más 
+         complejas en el futuro, aunque actualmente solo guarda el directorio raíz.
+      */
       const DB_NAME = 'meiga-search-db', DB_VER = 1, STORE = 'root-dir', DIR_KEY = 'rootDirectory';
       function openDB() { return new Promise((res, rej) => { const r = indexedDB.open(DB_NAME, DB_VER); r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE) }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error) }) }
       async function dbGet(k) { const db = await openDB(); return new Promise((res, rej) => { const r = db.transaction(STORE, 'readonly').objectStore(STORE).get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error) }) }
@@ -1897,8 +2345,18 @@
       const MEIGA_TOKEN_KEY = 'meiga_token', MEIGA_ROLE_KEY = 'meiga_role';
       const MEIGA_LLM_PROVIDER_KEY = 'meiga_llm_provider', MEIGA_LLM_MODEL_KEY = 'meiga_llm_model';
       function getToken() { return localStorage.getItem(MEIGA_TOKEN_KEY); }
-      function getRole()  { return localStorage.getItem(MEIGA_ROLE_KEY);  }
+      function getRole() { return localStorage.getItem(MEIGA_ROLE_KEY); }
       function showLoginModal() { $('loginModal').style.display = 'flex'; }
+      /**
+       * RBAC (Role-Based Access Control)
+       * ------------------------------------------------------------------
+       * Esta función es crucial: decide qué botones ve el usuario según su rol.
+       * - 'admin': Puede hacer TODO (gestionar archivos, limpiar base de datos).
+       * - 'editor': Puede buscar y subir archivos nuevos.
+       * - 'viewer': Solo puede buscar y leer; no ve botones de gestión.
+       * 
+       * @param {string} role - El rol asignado ('admin', 'editor' o 'viewer').
+       */
       function applyRoleUI(role) {
         // Revelar interfaz principal
         const shell = $('shellLayout'); if (shell) shell.style.display = '';
@@ -2090,20 +2548,20 @@
       /* ── Settings modal ─────────────────────────────────────── */
       function openSettingsModal() {
         const savedProvider = localStorage.getItem(MEIGA_LLM_PROVIDER_KEY);
-        const savedModel    = localStorage.getItem(MEIGA_LLM_MODEL_KEY);
+        const savedModel = localStorage.getItem(MEIGA_LLM_MODEL_KEY);
         if (savedProvider) $('settingsProvider').value = savedProvider;
-        if (savedModel)    $('settingsModel').value    = savedModel;
+        if (savedModel) $('settingsModel').value = savedModel;
         onSettingsProviderChange();
         document.getElementById('settingsModal').showModal();
       }
       function onSettingsProviderChange() {
         const p = $('settingsProvider').value;
         $('settingsApiKeyRow').style.display = p === 'local' ? 'none' : 'block';
-        $('settingsModelRow').style.display  = p === 'local' ? 'none' : 'block';
+        $('settingsModelRow').style.display = p === 'local' ? 'none' : 'block';
       }
       async function saveSettings() {
-        const provider  = $('settingsProvider').value;
-        const api_key   = $('settingsApiKey').value.trim() || null;
+        const provider = $('settingsProvider').value;
+        const api_key = $('settingsApiKey').value.trim() || null;
         const model_name = $('settingsModel').value.trim() || null;
         try {
           const r = await fetch('/api/system/settings', {
@@ -2231,16 +2689,31 @@
       }
       function selectHistory(q) { $('searchInput').value = q; onSearchSubmit() }
 
-      /* ── Search and Pagination ──────────────────────────────── */
+      /* ── MOTOR DE BÚSQUEDA (Interacción con Backend) ───────── */
       let allResults = [];
       let currentResultsPage = 0;
       const RESULTS_PER_PAGE = 10;
 
+      /**
+       * ¿QUÉ PASA CUANDO BUSCAS ALGO?
+       * 1. Capturamos el texto del input.
+       * 2. Guardamos la búsqueda en el historial local (searchHistory).
+       * 3. Llamamos a performSearch() para pedir los datos al servidor.
+       */
       function onSearchSubmit() {
         const q = $('searchInput').value.trim(); if (!q) return;
         currentQuery = q; addToHistory(q); setHasSearched(true); performSearch(q);
       }
 
+      /**
+       * performSearch: La función que habla con FastAPI.
+       * 
+       * @param {string} q - El texto que el usuario escribió.
+       * 
+       * NOTA PARA EL DESARROLLADOR:
+       * - Si el modo es 'semantic', el servidor usa AI para entender el significado.
+       * - Si el modo es 'text', busca coincidencias exactas de palabras (más rápido).
+       */
       async function performSearch(q) {
         showResultsState('loading');
         $('paginationContainer').style.display = 'none';
@@ -2332,7 +2805,7 @@
             </div>`;
           }).join('');
           extraHtml = `
-            <button onclick="event.stopPropagation();var el=document.getElementById('${cardId}');var open=el.style.display!=='none';el.style.display=open?'none':'block';this.querySelector('.chevron').style.transform=open?'':'rotate(180deg)';this.querySelector('.btn-text').textContent=open?'Ver ${extraFrags.length} coincidencia${extraFrags.length>1?'s':''} más':'Ocultar coincidencias'" 
+            <button onclick="event.stopPropagation();var el=document.getElementById('${cardId}');var open=el.style.display!=='none';el.style.display=open?'none':'block';this.querySelector('.chevron').style.transform=open?'':'rotate(180deg)';this.querySelector('.btn-text').textContent=open?'Ver ${extraFrags.length} coincidencia${extraFrags.length > 1 ? 's' : ''} más':'Ocultar coincidencias'" 
               style="background:none;border:none;cursor:pointer;font-size:.78rem;color:var(--accent);font-weight:600;padding:6px 0;display:flex;align-items:center;gap:4px;margin-top:4px">
               <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
               <span class="btn-text">Ver ${extraFrags.length} coincidencia${extraFrags.length > 1 ? 's' : ''} más</span>
@@ -2360,7 +2833,7 @@
     </div>
   </div>`;
       }
-      const STOP_WORDS = new Set(['el','la','los','las','un','una','unos','unas','de','del','al','en','por','con','para','sin','sobre','entre','hacia','desde','como','que','se','su','sus','lo','es','son','no','si','ya','más','muy','pero','este','esta','estos','estas','ese','esa','esos','esas','todo','toda','todos','todas','otro','otra','otros','otras','the','of','and','in','to','for','is','on','with','at','by','an','or','not','are','was','be','has','had','its','from','this','that','which','also']);
+      const STOP_WORDS = new Set(['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'del', 'al', 'en', 'por', 'con', 'para', 'sin', 'sobre', 'entre', 'hacia', 'desde', 'como', 'que', 'se', 'su', 'sus', 'lo', 'es', 'son', 'no', 'si', 'ya', 'más', 'muy', 'pero', 'este', 'esta', 'estos', 'estas', 'ese', 'esa', 'esos', 'esas', 'todo', 'toda', 'todos', 'todas', 'otro', 'otra', 'otros', 'otras', 'the', 'of', 'and', 'in', 'to', 'for', 'is', 'on', 'with', 'at', 'by', 'an', 'or', 'not', 'are', 'was', 'be', 'has', 'had', 'its', 'from', 'this', 'that', 'which', 'also']);
       function applyHighlights(t, _hl) {
         const q = (currentQuery || '').trim();
         if (!q) return t;
@@ -2370,9 +2843,15 @@
         const re = new RegExp(`(${escaped.join('|')})`, 'gi');
         return t.replace(re, '<mark>$1</mark>');
       }
-      /* ── Document Detail ──────────────────────────────────── */
+      /* ── Detalle del Documento ─────────────────────────────── */
       let currentDocSource = null;
 
+      /**
+       * Abre el panel de detalles para un documento específico.
+       * Recupera metadatos completos y el contenido original/resaltado.
+       * 
+       * @param {string} source - Identificador (ruta) del documento.
+       */
       async function openDocDetail(source) {
         currentDocSource = source;
         // Reset chat + summary state on each new document
@@ -2479,6 +2958,13 @@
         }
       }
 
+      /**
+       * ¿CÓMO FUNCIONA EL CHAT DEL DOCUMENTO? (RAG Localizado)
+       * 1. El usuario hace una pregunta sobre el PDF que está viendo.
+       * 2. Enviamos la pregunta + el ID del documento al backend.
+       * 3. El backend busca los fragmentos más relevantes de ESTE archivo.
+       * 4. La IA responde usando solo esa información "privada".
+       */
       async function sendChatMessage() {
         const input = $('ddChatInput');
         const pregunta = input.value.trim();
@@ -2616,6 +3102,14 @@
 
       let globalChatHistory = [];
 
+      /**
+       * ASISTENTE GLOBAL (La "Meiga" de la aplicación)
+       * ------------------------------------------------------------------
+       * Esta función permite hablar con TODA la base de datos a la vez.
+       * Ideal para preguntas transversales como: "¿Qué proyectos vencen en marzo?".
+       * 
+       * @param {Event} e - Para evitar que el formulario refresque la página.
+       */
       async function submitGlobalChat(e) {
         e.preventDefault();
         const input = $('globalChatInput');
@@ -2628,7 +3122,7 @@
         btn.disabled = true;
 
         addGlobalChatMessage(val, 'user');
-        
+
         // Creamos el contenedor del bot donde se inyectará el stream
         const botMsgDiv = addGlobalChatMessage('<div class="global-chat-typing"><span></span><span></span><span></span></div>', 'bot', true);
 
@@ -2636,49 +3130,49 @@
           const r = await fetch('/api/global-chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
               pregunta: val,
               history: globalChatHistory
             })
           });
-          
+
           if (!r.ok) {
             const err = await r.json();
             throw new Error(err.detail || 'Error en el chat');
           }
-          
+
           const reader = r.body.getReader();
           const decoder = new TextDecoder("utf-8");
-          
+
           let fullAnswer = "";
           let sourcesMap = {};
           let isFirstChunk = true;
           let buffer = "";
-          
+
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            
+
             buffer += decoder.decode(value, { stream: true });
-            
+
             let newlineIndex;
             // SSE events are separated by double newlines \n\n
             while ((newlineIndex = buffer.indexOf('\n\n')) >= 0) {
               const eventStr = buffer.slice(0, newlineIndex).trim();
               buffer = buffer.slice(newlineIndex + 2);
-              
+
               if (eventStr.startsWith('data: ')) {
                 const dataStr = eventStr.substring(6).trim();
                 if (!dataStr) continue;
-                
+
                 try {
                   const data = JSON.parse(dataStr);
                   if (data.error) throw new Error(data.error);
-                  
+
                   if (data.sources) {
                     sourcesMap = data.sources;
                   }
-                  
+
                   if (data.chunk) {
                     if (isFirstChunk) {
                       botMsgDiv.innerHTML = ''; // quitamos el typing animation
@@ -2697,16 +3191,16 @@
               }
             }
           }
-          
+
           // Stream finalizado: Convertimos Markdown completo a HTML
           let finalHtml = marked.parse(fullAnswer);
-          
+
           // Reemplazar citas [1], [2] por badges interactivos
           finalHtml = finalHtml.replace(/\\[(\\d+)\\]/g, (match, id) => {
             const srcNames = sourcesMap[id] || "Fuente desconocida";
             return `<sup style="cursor:help; background:#e2e8f0; padding:2px 4px; border-radius:4px; font-size:0.7em; margin-left:2px;" title="${esc(srcNames)}">${id}</sup>`;
           });
-          
+
           // Añadir cajetín de fuentes al final
           if (Object.keys(sourcesMap).length > 0) {
             const sourcesHtml = Object.entries(sourcesMap)
@@ -2714,18 +3208,18 @@
               .join('');
             finalHtml += `<div class="global-chat-sources">Fuentes utilizadas:<br>${sourcesHtml}</div>`;
           }
-          
+
           botMsgDiv.innerHTML = finalHtml;
-          
+
           // Guardar en el historial
           globalChatHistory.push({ role: 'user', content: val });
           globalChatHistory.push({ role: 'assistant', content: fullAnswer });
-          
+
           // Mantener historial pequeño (ej. max 6 mensajes)
           if (globalChatHistory.length > 6) {
             globalChatHistory = globalChatHistory.slice(globalChatHistory.length - 6);
           }
-          
+
         } catch (err) {
           botMsgDiv.innerHTML = `<em>Error: ${err.message}</em>`;
         } finally {
