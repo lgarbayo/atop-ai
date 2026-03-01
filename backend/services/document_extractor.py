@@ -32,7 +32,8 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 # Extensiones soportadas
-SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".csv", ".xlsx", ".png", ".jpg", ".jpeg"}
+SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".csv", ".xlsx", ".png", ".jpg", ".jpeg",
+                        ".docx", ".pptx", ".json", ".xml", ".md", ".html"}
 
 
 def extract_document_content(file_path: str) -> tuple[str, dict]:
@@ -72,6 +73,12 @@ def extract_document_content(file_path: str) -> tuple[str, dict]:
         ".png": _extract_img,
         ".jpg": _extract_img,
         ".jpeg": _extract_img,
+        ".docx": _extract_docx,
+        ".pptx": _extract_pptx,
+        ".json": _extract_json,
+        ".xml": _extract_xml,
+        ".md": _extract_txt,
+        ".html": _extract_html,
     }
 
     text, extra_meta = extractors[ext](file_path)
@@ -324,6 +331,83 @@ def _extract_xlsx(file_path: str) -> tuple[str, dict]:
 
     wb.close()
     return "\n".join(all_text), {}
+
+
+def _extract_docx(file_path: str) -> tuple[str, dict]:
+    """Extrae texto de un documento Word (.docx) usando python-docx."""
+    from docx import Document
+    doc = Document(file_path)
+    paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+    # También extraer texto de tablas
+    for table in doc.tables:
+        for row in table.rows:
+            cells = [cell.text.strip() for cell in row.cells if cell.text.strip()]
+            if cells:
+                paragraphs.append(" | ".join(cells))
+    meta = {}
+    if doc.core_properties.author:
+        meta["author"] = doc.core_properties.author
+    return "\n".join(paragraphs), meta
+
+
+def _extract_pptx(file_path: str) -> tuple[str, dict]:
+    """Extrae texto de una presentación PowerPoint (.pptx)."""
+    from pptx import Presentation
+    prs = Presentation(file_path)
+    slides_text = []
+    for i, slide in enumerate(prs.slides, 1):
+        parts = []
+        for shape in slide.shapes:
+            if shape.has_text_frame:
+                for paragraph in shape.text_frame.paragraphs:
+                    text = paragraph.text.strip()
+                    if text:
+                        parts.append(text)
+        if parts:
+            slides_text.append(f"[Diapositiva {i}]\n" + "\n".join(parts))
+    return "\n\n".join(slides_text), {}
+
+
+def _extract_json(file_path: str) -> tuple[str, dict]:
+    """Lee un archivo JSON y lo convierte en texto legible (clave: valor)."""
+    import json as json_mod
+    with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+        data = json_mod.load(f)
+
+    def flatten(obj, prefix=""):
+        lines = []
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                lines.extend(flatten(v, f"{prefix}{k}: "))
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                lines.extend(flatten(item, f"{prefix}[{i}] "))
+        else:
+            lines.append(f"{prefix}{obj}")
+        return lines
+
+    return "\n".join(flatten(data)), {}
+
+
+def _extract_xml(file_path: str) -> tuple[str, dict]:
+    """Extrae texto visible de un archivo XML usando BeautifulSoup."""
+    from bs4 import BeautifulSoup
+    with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+        soup = BeautifulSoup(f.read(), "lxml-xml")
+    return soup.get_text(separator="\n", strip=True), {}
+
+
+def _extract_html(file_path: str) -> tuple[str, dict]:
+    """Extrae texto visible de un archivo HTML usando BeautifulSoup."""
+    from bs4 import BeautifulSoup
+    with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+        soup = BeautifulSoup(f.read(), "html.parser")
+    # Eliminar scripts y estilos
+    for tag in soup(["script", "style", "noscript"]):
+        tag.decompose()
+    title = soup.title.string.strip() if soup.title and soup.title.string else ""
+    meta = {"html_title": title} if title else {}
+    return soup.get_text(separator="\n", strip=True), meta
 
 
 def clean_text(text: str) -> str:
