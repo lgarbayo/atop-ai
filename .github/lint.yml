@@ -1,0 +1,23 @@
+name: Quality Gates
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint-backend:
+    name: Ruff Linter (Backend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff Check
+        # El flag --output-format=github hace que los errores salgan bonitos en la web
+        run: ruff check --output-format=github .
