@@ -54,6 +54,7 @@ MeigaSearch resuelve el problema de búsqueda a través de documentos corporativ
 | `admin` | `admin123` | Administrador |
 | `empleado` | `normal123` | Normal |
 | `lector` | `lector123` | Lector |
+| `editor` | `editor123` | Editor |
 
 ## ⚙️ Configuración del LLM
 
