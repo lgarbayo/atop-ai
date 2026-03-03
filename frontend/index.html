@@ -41,8 +41,10 @@
     :root {
       --text: #14213d;
       /* Azul Medianoche para texto principal */
-      --accent: #fca311;
-      /* Ámbar para llamadas a la acción y resaltados */
+      --accent: #1f2937;
+      /* Gris carbón para llamadas a la acción y resaltados */
+      --accent-hover: #111827;
+      --highlight-bg: rgba(31, 41, 55, 0.22);
       --surface: #ffffff;
       /* Fondo de componentes y tarjetas */
       --bg: #e5e5e5;
@@ -62,18 +64,61 @@
       background: var(--bg);
     }
 
+    mark {
+      background: var(--highlight-bg);
+      color: inherit;
+      border-radius: 2px;
+      padding: 0 1px;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+
     /* Smooth gradient background — dark amber bottom to soft white top */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       z-index: -1;
-      background: linear-gradient(to top,
-          #050d1a 0%,
-          #0d1f3c 25%,
-          #1a4a7a 50%,
-          #3a7bb8 75%,
-          #6aadd4 100%);
+      background: #b2bdd3;
+    }
+
+    /* App logo (fixed top-left) */
+    #appTitle {
+      position: fixed;
+      top: calc(16px + env(safe-area-inset-top, 0px));
+      left: calc(16px + env(safe-area-inset-left, 0px));
+      z-index: 250;
+      margin: 0 !important;
+      pointer-events: auto;
+    }
+
+    .app-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .app-brand-btn {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    .app-brand-btn:focus-visible {
+      outline: 3px solid rgba(31, 41, 55, .55);
+      outline-offset: 6px;
+      border-radius: 10px;
+    }
+
+    .app-logo {
+      width: 96px;
+      height: 96px;
+      display: block;
     }
 
     /* Starfield canvas — sits above gradient, below all UI */
@@ -239,14 +284,14 @@
       background: transparent;
       font-family: 'Inter', 'Roboto', sans-serif;
       font-size: 1rem;
-      color: #fff;
+      color: #000000;
       padding: 18px 12px 18px 0;
     }
 
     #searchInput::placeholder {
       font-family: 'Times New Roman', Georgia, serif;
       font-style: italic;
-      color: rgba(255, 255, 255, .75);
+      color: rgba(0, 0, 0, .55);
     }
 
     #searchInput:disabled {
@@ -274,7 +319,7 @@
       border: none;
       border-radius: 16px 3px 16px 3px;
       background: transparent;
-      color: rgba(255, 255, 255, .85);
+      color: rgba(0, 0, 0, 0.85);
       cursor: pointer;
       font-family: 'Inter', 'Roboto', sans-serif;
       font-size: .82rem;
@@ -285,14 +330,14 @@
 
     .mode-btn.active {
       background: var(--accent);
-      color: var(--text);
+      color: #ffffff;
       font-weight: 700;
-      box-shadow: 0 1px 6px rgba(252, 163, 17, .35);
+      box-shadow: 0 1px 6px rgba(17, 24, 39, .25);
     }
 
     .mode-btn:hover:not(.active) {
       background: rgba(255, 255, 255, .15);
-      color: #fff;
+      color: #000000;
     }
 
     .filter-btn {
@@ -305,7 +350,7 @@
       background: rgba(255, 255, 255, .1);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      color: #fff;
+      color: #000000;
       font-family: 'Inter', 'Roboto', sans-serif;
       font-size: .85rem;
       font-weight: 600;
@@ -322,15 +367,15 @@
     }
 
     .filter-btn--active {
-      background: var(--text);
-      color: #fff;
-      border-color: var(--text);
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
     }
 
     .filter-btn--active:hover {
-      background: #0a1128;
-      color: #fff;
-      border-color: #0a1128;
+      background: var(--accent-hover);
+      color: #ffffff;
+      border-color: var(--accent-hover);
     }
 
     /* Filter Popover specific */
@@ -346,6 +391,10 @@
 
     .filter-popover.popover-base {
       animation: popover-center-in .15s ease;
+      background: rgba(249, 250, 251, .98);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #111827;
     }
 
     @keyframes popover-center-in {
@@ -365,10 +414,10 @@
       font-weight: 700;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: rgba(20, 33, 61, .4);
+      color: rgba(0, 0, 0, .5);
       margin-bottom: 8px;
       padding-bottom: 4px;
-      border-bottom: 1px solid rgba(20, 33, 61, .08);
+      border-bottom: 1px solid rgba(0, 0, 0, .08);
       display: block;
     }
 
@@ -384,7 +433,7 @@
       gap: 10px;
       font-size: .85rem;
       font-weight: 500;
-      color: var(--text);
+      color: #111827;
       cursor: pointer;
       padding: 6px 8px;
       border-radius: 6px;
@@ -393,15 +442,83 @@
     }
 
     .filter-label:hover {
-      background: rgba(20, 33, 61, .06);
+      background: rgba(0, 0, 0, .04);
     }
 
     .filter-cb {
-      accent-color: var(--accent);
+      -webkit-appearance: none;
+      appearance: none;
       width: 16px;
       height: 16px;
       margin: 0;
       cursor: pointer;
+      border: 1.5px solid rgba(0, 0, 0, .35);
+      border-radius: 3px;
+      background: #ffffff;
+      display: grid;
+      place-content: center;
+      transition: background .12s, border-color .12s;
+    }
+
+    .filter-cb::before {
+      content: '';
+      width: 4px;
+      height: 8px;
+      border-right: 2px solid #ffffff;
+      border-bottom: 2px solid #ffffff;
+      transform: rotate(45deg);
+      opacity: 0;
+      margin-top: -1px;
+    }
+
+    .filter-cb:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .filter-cb:checked::before {
+      opacity: 1;
+    }
+
+    .filter-cb:focus-visible {
+      outline: 2px solid rgba(17, 24, 39, .35);
+      outline-offset: 2px;
+    }
+
+    .filter-input {
+      padding: 10px 12px;
+      border: 1.5px solid rgba(0, 0, 0, .18);
+      border-radius: 10px 3px 10px 3px;
+      font-family: 'Inter', 'Roboto', sans-serif;
+      font-size: .85rem;
+      color: #111827;
+      background: #ffffff;
+      outline: none;
+    }
+
+    .filter-input::placeholder {
+      color: rgba(0, 0, 0, .5);
+    }
+
+    .filter-input:focus {
+      border-color: rgba(0, 0, 0, .4);
+      box-shadow: 0 0 0 3px rgba(17, 24, 39, .10);
+    }
+
+    .filter-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 6px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 700;
+      background: rgba(17, 24, 39, .12);
+      color: #111827;
+      border: 1px solid rgba(0, 0, 0, .12);
+      margin-left: 2px;
     }
 
     /* File manager trigger */
@@ -410,10 +527,23 @@
       align-items: center;
       gap: 7px;
       padding: 8px 16px 8px 12px;
-      background: var(--text);
-      color: #fff;
-      border: none;
+      background: var(--accent);
+      color: #ffffff;
+      border: 1px solid rgba(0, 0, 0, .12);
       border-radius: 18px 4px 18px 4px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(17, 24, 39, .18);
+      transition: background .15s, transform .1s, box-shadow .15s;
+    }
+
+    .fm-trigger:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(17, 24, 39, .22);
+    }
+
+    .fm-trigger:active {
+      transform: none;
     }
 
     .fm-trigger--open .fm-chevron {
@@ -430,8 +560,8 @@
       position: absolute;
       background: var(--surface);
       border-radius: 16px 4px 16px 4px;
-      border: 1.5px solid rgba(20, 33, 61, .12);
-      box-shadow: 0 8px 32px rgba(20, 33, 61, .16);
+      border: 1.5px solid rgba(0, 0, 0, .12);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .14);
       padding: 16px;
       display: flex;
       flex-direction: column;
@@ -523,7 +653,7 @@
     }
 
     .fm-action-btn:hover:not(:disabled) {
-      background: rgba(252, 163, 17, .1);
+      background: rgba(17, 24, 39, .06);
     }
 
     .fm-action-btn:disabled {
@@ -544,7 +674,7 @@
       flex: 0 !important;
       font-size: .65rem;
       font-weight: 600;
-      background: rgba(252, 163, 17, .15);
+      background: rgba(17, 24, 39, .1);
       color: rgba(20, 33, 61, .6);
       padding: 2px 7px;
       border-radius: 8px;
@@ -564,7 +694,7 @@
       font-weight: 800;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: #fff;
+      color: #000000;
       text-shadow: 0 1px 3px rgba(0, 0, 0, .15);
     }
 
@@ -573,7 +703,7 @@
       border: none;
       font-size: .75rem;
       font-weight: 700;
-      color: rgba(255, 255, 255, .7);
+      color: rgba(0, 0, 0, 0.7);
       cursor: pointer;
       padding: 0;
       font-family: 'Inter', 'Roboto', sans-serif;
@@ -581,7 +711,7 @@
     }
 
     .clear-all-btn:hover {
-      color: #fca311;
+      color: var(--accent);
     }
 
     .recent-item {
@@ -610,14 +740,14 @@
     }
 
     .item-icon {
-      color: rgba(255, 255, 255, .5);
+      color: rgba(0, 0, 0, .5);
       flex-shrink: 0;
     }
 
     .item-text {
       flex: 1;
       font-size: .86rem;
-      color: #fff;
+      color: #000000;
       font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
@@ -672,7 +802,7 @@
     .doc-title {
       font-size: .95rem;
       font-weight: 600;
-      color: #fff;
+      color: #000000;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -688,16 +818,14 @@
 
     .fragment {
       font-size: .85rem;
-      color: rgba(255, 255, 255, .85);
+      color: rgba(0, 0, 0, .85);
       line-height: 1.65;
       margin: 0 0 14px;
     }
 
     .fragment mark {
-      background: rgba(252, 163, 17, 0.4);
-      color: #ffffff;
-      border-radius: 2px;
-      padding: 0 1px;
+      background: var(--highlight-bg);
+      color: inherit;
     }
 
     .tag {
@@ -759,11 +887,12 @@
     .picker-icon-wrap {
       width: 64px;
       height: 64px;
-      background: rgba(252, 163, 17, .1);
+      background: rgba(17, 24, 39, .06);
       border-radius: 16px 4px 16px 4px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--accent);
     }
 
     .picker-title {
@@ -802,7 +931,7 @@
 
     .picker-btn:hover:not(:disabled) {
       background: var(--accent);
-      color: var(--text);
+      color: #ffffff;
     }
 
     .picker-btn:active:not(:disabled) {
@@ -828,7 +957,7 @@
     .spinner {
       width: 36px;
       height: 36px;
-      border: 3px solid rgba(252, 163, 17, .2);
+      border: 3px solid rgba(31, 41, 55, .2);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin .7s linear infinite;
@@ -870,7 +999,7 @@
       align-items: center;
       gap: 12px;
       padding: 16px 20px;
-      background: rgba(252, 163, 17, .08);
+      background: rgba(17, 24, 39, .06);
       border-radius: 10px;
       border-left: 3px solid var(--accent);
     }
@@ -1042,7 +1171,7 @@
     }
 
     .fe-breadcrumb button:hover {
-      background: rgba(252, 163, 17, .1);
+      background: rgba(17, 24, 39, .06);
     }
 
     .fe-list {
@@ -1070,7 +1199,7 @@
     }
 
     .fe-item:hover {
-      background: rgba(252, 163, 17, .08);
+      background: rgba(17, 24, 39, .05);
     }
 
     .fe-item-icon {
@@ -1084,7 +1213,7 @@
     }
 
     .fe-item-icon.folder {
-      background: rgba(252, 163, 17, .12);
+      background: rgba(17, 24, 39, .08);
       color: var(--accent);
     }
 
@@ -1264,8 +1393,8 @@
     }
 
     .dd-badge.cat {
-      background: rgba(252, 163, 17, .1);
-      color: #b87600;
+      background: rgba(17, 24, 39, .08);
+      color: rgba(17, 24, 39, .75);
     }
 
     .dd-badge.ext {
@@ -1366,7 +1495,7 @@
     }
 
     .drag-icon {
-      color: #fca311;
+      color: var(--accent);
       width: 64px;
       height: 64px;
       margin-bottom: 8px;
@@ -1391,12 +1520,12 @@
       gap: 6px;
       padding: 5px 12px;
       border-radius: 6px;
-      background: #fca311;
+      background: var(--accent);
       border: none;
       cursor: pointer;
       font-size: 0.8rem;
       font-weight: 700;
-      color: #14213d;
+      color: #ffffff;
       white-space: nowrap;
       flex-shrink: 0;
     }
@@ -1424,8 +1553,8 @@
     }
 
     .dd-chat-bubble--user {
-      background: #fca311;
-      color: #14213d;
+      background: var(--accent);
+      color: #ffffff;
       align-self: flex-end;
     }
 
@@ -1454,17 +1583,17 @@
     }
 
     .dd-chat-input:focus {
-      border-color: #fca311;
+      border-color: var(--accent);
     }
 
     .dd-chat-send {
       padding: .6rem 1.1rem;
-      background: #fca311;
+      background: var(--accent);
       border: none;
       border-radius: 8px;
       font-weight: 700;
       font-size: .875rem;
-      color: #14213d;
+      color: #ffffff;
       cursor: pointer;
       white-space: nowrap;
     }
@@ -1521,7 +1650,7 @@
 
     .settings-dialog select:focus,
     .settings-dialog input:focus {
-      border-color: #fca311;
+      border-color: var(--accent);
     }
 
     .settings-actions {
@@ -1543,12 +1672,12 @@
 
     .settings-btn-save {
       padding: .6rem 1.2rem;
-      background: #fca311;
+      background: var(--accent);
       border: none;
       border-radius: 8px;
       font-weight: 700;
       font-size: .875rem;
-      color: #14213d;
+      color: #ffffff;
       cursor: pointer;
     }
 
@@ -1619,7 +1748,7 @@
       <input id="loginPass" type="password" placeholder="Contraseña" autocomplete="current-password"
         style="width:100%;padding:.65rem .9rem;border:1.5px solid #d1d5db;border-radius:8px;font-size:.95rem;outline:none;color:#14213d;" />
       <button id="loginBtn"
-        style="width:100%;padding:.7rem;background:#fca311;color:#14213d;font-weight:700;font-size:1rem;border:none;border-radius:8px;cursor:pointer;">
+        style="width:100%;padding:.7rem;background:var(--accent);color:#ffffff;font-weight:700;font-size:1rem;border:none;border-radius:8px;cursor:pointer;">
         Entrar
       </button>
       <p id="loginError" style="display:none;margin:0;font-size:.85rem;color:#dc2626;">Usuario o contraseña incorrectos
@@ -1652,7 +1781,7 @@
         </svg>
       </button>
       <div class="picker-icon-wrap">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#fca311" viewBox="0 0 16 16">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
           <path
             d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
           <path
@@ -1691,7 +1820,7 @@
       </button>
 
       <p class="picker-hint" id="pickerHint" style="display:none">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#fca311" viewBox="0 0 16 16">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
           <path
             d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
         </svg>
@@ -1706,7 +1835,7 @@
     <!-- Fila 1: Ajustes, Gestionar archivos, Cerrar sesión -->
     <div style="display:flex;gap:8px;align-items:center;">
       <button id="settingsBtn" class="fm-trigger" style="display:none;" onclick="openSettingsModal()">
-        &#9881;&#65039; <span>Ajustes LLM</span>
+        <span>Ajustes LLM</span>
       </button>
       <div style="position:relative;" id="fmContainer">
         <button class="fm-trigger" id="fmTriggerBtn" onclick="toggleFmMenu()" aria-label="Gestionar archivos">
@@ -1726,7 +1855,7 @@
         <div class="fm-popover popover-base" id="fmPopover" style="display:none">
           <span class="fm-section-label">Directorio raíz</span>
           <div class="fm-dir-row">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#fca311" class="fm-dir-icon"
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="fm-dir-icon"
               viewBox="0 0 16 16">
               <path
                 d="M.5 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.12 1.349l.459 1.025H13.5A1.5 1.5 0 0 1 15 5.914V12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zM2 3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H7.586L5.586 3H2z" />
@@ -1763,17 +1892,11 @@
       </button>
     </div>
 
-    <!-- Fila 2: Subir archivo + Home -->
+    <!-- Fila 2: (reservada) -->
     <div style="display:flex;gap:8px;align-items:center;">
       <input id="uploadInput" type="file" style="display:none"
         accept=".pdf,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.docx,.pptx,.json,.xml,.md,.html"
         onchange="if(this.files[0]) uploadDocument(this.files[0])" />
-      <button id="homeBtn" onclick="resetSearchState()"
-        style="display:none; background:rgba(255,255,255,0.85); backdrop-filter:blur(8px); border:1px solid rgba(20,33,61,0.1); border-radius:12px; padding:8px 14px; cursor:pointer; align-items:center; gap:8px; transition:all .2s ease; box-shadow:0 2px 8px rgba(20,33,61,0.08);"
-        onmouseover="this.style.background='rgba(20,33,61,0.06)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(20,33,61,0.12)'"
-        onmouseout="this.style.background='rgba(255,255,255,0.85)';this.style.transform='none';this.style.boxShadow='0 2px 8px rgba(20,33,61,0.08)'">
-        <img src="assets/home-1-svgrepo-com.svg" alt="Home" style="width:24px;height:24px;" />
-      </button>
     </div>
   </div>
 
@@ -1785,9 +1908,9 @@
 
       <!-- App title -->
       <div id="appTitle" class="flex flex-col items-center mb-4 gap-0.5">
-        <div class="flex items-center gap-2">
-          <img src="assets/atop(ai).svg" alt="atop(ai)" style="width: 128px; height: 128px;" />
-        </div>
+	        <button type="button" class="app-brand app-brand-btn" onclick="resetSearchState()" aria-label="Volver a inicio">
+	          <img src="assets/atop(ai).svg" alt="atop(ai)" class="app-logo" />
+	        </button>
       </div>
 
       <!-- Search bar -->
@@ -1796,9 +1919,9 @@
           autocorrect="off" spellcheck="false" aria-label="Search documents" />
         <div class="flex items-center gap-2 pl-2 flex-shrink-0">
           <button id="searchBtn" onclick="onSearchSubmit()"
-            style="background:#fca311;border:none;color:#14213d;cursor:pointer;padding:10px 20px;border-radius:14px 3px 14px 3px;font-family:'Inter',sans-serif;font-size:.84rem;font-weight:700;transition:background .15s,color .15s,transform .1s;white-space:nowrap;box-shadow:0 2px 8px rgba(252,163,17,.3)"
-            onmouseover="this.style.background='#fff';this.style.transform='translateY(-1px)'"
-            onmouseout="this.style.background='#fca311';this.style.transform='none'">
+            style="background:var(--accent);border:none;color:#ffffff;cursor:pointer;padding:10px 20px;border-radius:14px 3px 14px 3px;font-family:'Inter',sans-serif;font-size:.84rem;font-weight:700;transition:background .15s,color .15s,transform .1s;white-space:nowrap;box-shadow:0 2px 8px rgba(17,24,39,.25)"
+            onmouseover="this.style.background='var(--accent-hover)';this.style.transform='translateY(-1px)'"
+            onmouseout="this.style.background='var(--accent)';this.style.transform='none'">
             Buscar
           </button>
         </div>
@@ -1884,7 +2007,7 @@
             <div class="filter-grid" style="display:flex;gap:8px;margin-bottom:8px;">
               <input type="number" id="filterMinSize" placeholder="Mín (MB)" class="filter-input" style="flex: 1;"
                 min="0" onchange="updateFilterBadge()">
-              <span style="color:var(--text);align-self:center;font-size:0.8rem;opacity:0.6;">-</span>
+              <span style="color:rgba(0,0,0,.55);align-self:center;font-size:0.8rem;opacity:0.8;">-</span>
               <input type="number" id="filterMaxSize" placeholder="Máx (MB)" class="filter-input" style="flex: 1;"
                 min="0" onchange="updateFilterBadge()">
             </div>
@@ -1892,7 +2015,7 @@
             <div class="filter-grid" style="display:flex;gap:8px;margin-bottom:8px;">
               <input type="number" id="filterMinYear" placeholder="Año Mín" class="filter-input" style="flex: 1;"
                 min="1900" max="2100" onchange="updateFilterBadge()">
-              <span style="color:var(--text);align-self:center;font-size:0.8rem;opacity:0.6;">-</span>
+              <span style="color:rgba(0,0,0,.55);align-self:center;font-size:0.8rem;opacity:0.8;">-</span>
               <input type="number" id="filterMaxYear" placeholder="Año Máx" class="filter-input" style="flex: 1;"
                 min="1900" max="2100" onchange="updateFilterBadge()">
             </div>
@@ -1916,7 +2039,7 @@
           <div class="spinner"></div>
         </div>
         <div id="stateError" class="error-state" style="display:none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#fca311" viewBox="0 0 16 16">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" style="color:var(--accent);">
             <path
               d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
           </svg>
@@ -1932,7 +2055,7 @@
         </div>
         <!-- Query Expansion Info removed (descriptive search removed) -->
         <p id="resultsMeta"
-          style="display:none;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.8);margin:0;padding-bottom: 12px;">
+          style="display:none;font-size:.78rem;font-weight:700;color:rgba(0,0,0,.78);margin:0;padding-bottom: 12px;">
         </p>
         <div id="resultsList" class="flex flex-col gap-3" style="display:none"></div>
         <div id="paginationContainer" style="display:none; justify-content:center; padding: 10px 0;">
@@ -2047,21 +2170,24 @@
     </dialog>
 
     <!-- SETUP ONBOARDING MODAL (admin, obligatorio en primer login) -->
-    <dialog id="setupModal" style="border:none;border-radius:20px 6px 20px 6px;padding:0;max-width:480px;width:calc(100% - 32px);box-shadow:0 24px 64px rgba(20,33,61,.35);">
+    <dialog id="setupModal"
+      style="border:none;border-radius:20px 6px 20px 6px;padding:0;max-width:480px;width:calc(100% - 32px);box-shadow:0 24px 64px rgba(20,33,61,.35);">
       <style>
         #setupModal::backdrop {
-          background: rgba(20,33,61,.72);
+          background: rgba(20, 33, 61, .72);
           backdrop-filter: blur(6px);
         }
       </style>
       <div style="padding:2.25rem 2rem 2rem;display:flex;flex-direction:column;gap:1.25rem;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#fca311" viewBox="0 0 16 16">
-            <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9z"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16" style="color:var(--accent);">
+            <path
+              d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9z" />
           </svg>
           <div>
             <div style="font-size:1.15rem;font-weight:700;color:#14213d;">Configura tu directorio de empresa</div>
-            <div style="font-size:.8rem;color:#6b7280;margin-top:2px;">Paso obligatorio — solo para administradores</div>
+            <div style="font-size:.8rem;color:#6b7280;margin-top:2px;">Paso obligatorio — solo para administradores
+            </div>
           </div>
         </div>
         <p style="font-size:.9rem;color:#374151;line-height:1.55;margin:0;">
@@ -2069,17 +2195,20 @@
           (.pdf, .txt, .csv, .xlsx, .png, .jpg, .docx, .pptx…) serán subidos e indexados automáticamente.
           Esta ventana no puede cerrarse hasta completar la subida.
         </p>
-        <label for="setupDirInput" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:#fca311;color:#14213d;font-weight:700;font-size:.9rem;padding:.7rem 1.4rem;border-radius:10px 3px 10px 3px;border:none;width:fit-content;transition:opacity .15s;">
+        <label for="setupDirInput"
+          style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:var(--accent);color:#ffffff;font-weight:700;font-size:.9rem;padding:.7rem 1.4rem;border-radius:10px 3px 10px 3px;border:none;width:fit-content;transition:opacity .15s;">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-            <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+            <path
+              d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+            <path
+              d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
           </svg>
           Seleccionar Directorio Raíz
         </label>
-        <input id="setupDirInput" type="file" webkitdirectory multiple
-          style="display:none;"
+        <input id="setupDirInput" type="file" webkitdirectory multiple style="display:none;"
           onchange="handlePickedFiles(this.files)" />
-        <p style="font-size:.75rem;color:#9ca3af;margin:0;">Podrás añadir más documentos después desde el panel de administración.</p>
+        <p style="font-size:.75rem;color:#9ca3af;margin:0;">Podrás añadir más documentos después desde el panel de
+          administración.</p>
       </div>
     </dialog>
 
@@ -2089,7 +2218,7 @@
       <div
         style="background:#fff;border-radius:22px 6px 22px 6px;border:1.5px solid rgba(20,33,61,.14);padding:2rem 2rem 1.75rem;width:100%;max-width:440px;box-shadow:0 12px 48px rgba(20,33,61,.22);display:flex;flex-direction:column;gap:1.1rem;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#fca311" viewBox="0 0 16 16">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" style="color:var(--accent);">
             <path
               d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
             <path
@@ -2100,7 +2229,7 @@
         </div>
         <div style="background:rgba(20,33,61,.08);border-radius:99px;height:7px;overflow:hidden;">
           <div id="uploadProgressFill"
-            style="height:100%;background:#fca311;border-radius:99px;width:0%;transition:width .25s ease;"></div>
+            style="height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .25s ease;"></div>
         </div>
         <div
           style="font-size:.85rem;color:rgba(20,33,61,.65);display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;">
@@ -2235,8 +2364,7 @@
       /* ── Interfaz y Diseño ────────────────────────────────────────────── */
       function setHasSearched(v) {
         hasSearched = v;
-        $('appTitle').style.display = v ? 'none' : 'flex';
-        $('homeBtn').style.display = v ? 'flex' : 'none';
+        $('appTitle').style.display = 'flex';
         $('recentSection').style.display = (!v && searchHistory.length > 0) ? 'block' : 'none';
         const l = $('shellLayout');
         if (v) { l.style.justifyContent = 'flex-start'; l.style.paddingTop = '40px' }
@@ -2635,7 +2763,7 @@
               <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
               <span class="btn-text">Ver ${extraFrags.length} coincidencia${extraFrags.length > 1 ? 's' : ''} más</span>
             </button>
-            <div id="${cardId}" style="display:none;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:rgba(252,163,17,0.03);margin-top:6px;max-height:300px;overflow-y:auto">
+            <div id="${cardId}" style="display:none;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:rgba(17,24,39,0.04);margin-top:6px;max-height:300px;overflow-y:auto">
               ${extraItems}
             </div>`;
         }
@@ -2647,9 +2775,9 @@
         <span class="doc-title" title="${esc(doc.title)}">${esc(doc.title)}</span>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        ${matchCount > 1 ? `<span style="font-size:.7rem;font-weight:600;color:white;background:rgba(255,255,255,.15);padding:3px 8px;border-radius:10px">${matchCount} coincidencias</span>` : ''}
-        <div class="score-badge" title="Relevance: ${score}%">${score}%</div>
-      </div>
+	        ${matchCount > 1 ? `<span style="font-size:.7rem;font-weight:600;color:#000000;background:rgba(17,24,39,.08);padding:3px 8px;border-radius:10px">${matchCount} coincidencias</span>` : ''}
+	        <div class="score-badge" title="Relevance: ${score}%">${score}%</div>
+	      </div>
     </div>
     <p class="fragment" onclick="openDocDetail('${esc(doc.source).replace(/'/g, "\\'")}')">${bestFragHtml}</p>
     ${extraHtml}
