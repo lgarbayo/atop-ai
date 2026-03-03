@@ -82,14 +82,71 @@
       background: #b2bdd3;
     }
 
-    /* App logo (fixed top-left) */
-    #appTitle {
+    /* App shell */
+    .app-shell {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* Sticky header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 600;
+      background: rgba(229, 231, 235, .55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0, 0, 0, .06);
+    }
+
+    .app-header__inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .app-header__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .app-header__actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .app-header__controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 18px 16px 48px;
+    }
+
+    /* Fullscreen backdrops */
+    .filter-backdrop {
       position: fixed;
-      top: calc(16px + env(safe-area-inset-top, 0px));
-      left: calc(16px + env(safe-area-inset-left, 0px));
-      z-index: 250;
-      margin: 0 !important;
-      pointer-events: auto;
+      inset: 0;
+      z-index: 190;
+      display: none;
     }
 
     .app-brand {
@@ -116,9 +173,75 @@
     }
 
     .app-logo {
-      width: 96px;
-      height: 96px;
+      width: 56px;
+      height: 56px;
       display: block;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 18px 4px 18px 4px;
+      border: 1px solid rgba(0, 0, 0, .12);
+      background: rgba(255, 255, 255, .55);
+      color: #111827;
+      cursor: pointer;
+      font-family: 'Inter', 'Roboto', sans-serif;
+      font-size: .84rem;
+      font-weight: 700;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, .72);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(17, 24, 39, .12);
+    }
+
+    .btn:active {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid rgba(17, 24, 39, .25);
+      outline-offset: 3px;
+    }
+
+    .btn--primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: rgba(0, 0, 0, .12);
+      box-shadow: 0 2px 8px rgba(17, 24, 39, .18);
+    }
+
+    .btn--primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 12px rgba(17, 24, 39, .22);
+    }
+
+    .btn--link {
+      padding: 6px 0;
+      border: none;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      color: rgba(17, 24, 39, .75);
+      font-weight: 600;
+    }
+
+    .btn--link:hover {
+      background: transparent;
+      transform: none;
+      box-shadow: none;
+      color: rgba(17, 24, 39, .95);
+      text-decoration: underline;
     }
 
     /* Starfield canvas — sits above gradient, below all UI */
@@ -521,6 +644,52 @@
       margin-left: 2px;
     }
 
+    .filter-active {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 0, 0, .08);
+    }
+
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 0, 0, .12);
+      background: rgba(17, 24, 39, .08);
+      color: rgba(17, 24, 39, .9);
+      font-size: .76rem;
+      font-weight: 700;
+      cursor: pointer;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .filter-chip:hover {
+      background: rgba(17, 24, 39, .12);
+    }
+
+    .filter-chip::after {
+      content: '×';
+      font-weight: 900;
+      opacity: .6;
+    }
+
     /* File manager trigger */
     .fm-trigger {
       display: inline-flex;
@@ -792,6 +961,62 @@
       transform: translateY(-1px);
     }
 
+    .result-card__head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .result-card__left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .result-card__right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .match-badge {
+      font-size: .7rem;
+      font-weight: 700;
+      color: rgba(0, 0, 0, .8);
+      background: rgba(17, 24, 39, .08);
+      border: 1px solid rgba(0, 0, 0, .08);
+      padding: 3px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+	    .result-card__extras {
+	      margin-top: 4px;
+	    }
+	
+	    .result-card__tags {
+	      margin-top: 4px;
+	    }
+
+    .result-frag {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      font-size: .82rem;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, .78);
+    }
+
+    .result-frag__score {
+      font-size: .7rem;
+      font-weight: 700;
+      color: rgba(0, 0, 0, .35);
+      margin-right: 6px;
+    }
+
     .doc-type {
       font-size: .65rem;
       font-weight: 700;
@@ -834,6 +1059,16 @@
       background: var(--accent);
       border-radius: 8px;
       color: #ffffff;
+    }
+
+    /* Results header */
+    .results-meta {
+      display: none;
+      font-size: .78rem;
+      font-weight: 800;
+      color: rgba(0, 0, 0, .78);
+      margin: 0;
+      padding-bottom: 12px;
     }
 
     /* Root directory picker overlay */
@@ -1829,212 +2064,192 @@
     </div>
   </div>
 
-  <!-- FILE MANAGER — fixed top-right (hidden until authenticated) -->
-  <div id="topBar"
-    style="position:fixed;top:16px;right:20px;z-index:300;display:none;flex-direction:column;align-items:flex-end;gap:8px;">
-    <!-- Fila 1: Ajustes, Gestionar archivos, Cerrar sesión -->
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button id="settingsBtn" class="fm-trigger" style="display:none;" onclick="openSettingsModal()">
-        <span>Ajustes LLM</span>
-      </button>
-      <div style="position:relative;" id="fmContainer">
-        <button class="fm-trigger" id="fmTriggerBtn" onclick="toggleFmMenu()" aria-label="Gestionar archivos">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path
-              d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.12 1.349l.459 1.025H13.5A1.5 1.5 0 0 1 15 5.914V12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zm8.485 0H2.5a.5.5 0 0 0-.5.5V12.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V5.914a.5.5 0 0 0-.5-.5H7.264a.5.5 0 0 1-.447-.276L6.353 3.5H2.5z" />
-          </svg>
-          <span>Gestionar archivos</span>
-          <svg id="fmChevron" class="fm-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-            fill="currentColor" viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
-          </svg>
-        </button>
-
-        <div class="fm-backdrop" id="fmBackdrop" style="display:none" onclick="closeFmMenu()"></div>
-        <div class="fm-popover popover-base" id="fmPopover" style="display:none">
-          <span class="fm-section-label">Directorio raíz</span>
-          <div class="fm-dir-row">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="fm-dir-icon"
-              viewBox="0 0 16 16">
-              <path
-                d="M.5 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.12 1.349l.459 1.025H13.5A1.5 1.5 0 0 1 15 5.914V12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zM2 3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H7.586L5.586 3H2z" />
-            </svg>
-            <span class="fm-dir-name fm-dir-name--unset" id="fmDirName">Sin configurar</span>
-          </div>
-          <div class="fm-divider"></div>
-
-          <!-- <button class="fm-action-btn" onclick="doPickDirectory()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path
-                d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-              <path
-                d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
-            </svg>
-            <span>Subir más archivos</span>
-          </button> -->
-
-          <button class="fm-action-btn danger" onclick="clearDatabase()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path
-                d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-              <path fill-rule="evenodd"
-                d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
-            </svg>
-            <span>Limpiar base de datos</span>
-          </button>
-        </div>
-      </div> <!-- Closes fmContainer -->
-
-      <!-- CERRAR SESIÓN -->
-      <button id="logoutBtn" class="fm-trigger" onclick="logoutUser()">
-        <span>Cerrar sesión</span>
-      </button>
-    </div>
-
-    <!-- Fila 2: (reservada) -->
-    <div style="display:flex;gap:8px;align-items:center;">
-      <input id="uploadInput" type="file" style="display:none"
-        accept=".pdf,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.docx,.pptx,.json,.xml,.md,.html"
-        onchange="if(this.files[0]) uploadDocument(this.files[0])" />
-    </div>
-  </div>
-
   <!-- MAIN CONTENT — hidden until authenticated -->
-  <div id="shellLayout" class="min-h-screen flex flex-col items-center justify-center px-4 pb-12"
-    style="padding-top:32px;display:none">
+  <div id="shellLayout" class="app-shell" style="display:none">
 
-    <div class="w-full flex flex-col items-center gap-4" style="max-width:860px">
-
-      <!-- App title -->
-      <div id="appTitle" class="flex flex-col items-center mb-4 gap-0.5">
-	        <button type="button" class="app-brand app-brand-btn" onclick="resetSearchState()" aria-label="Volver a inicio">
-	          <img src="assets/atop(ai).svg" alt="atop(ai)" class="app-logo" />
-	        </button>
-      </div>
-
-      <!-- Search bar -->
-      <div class="search-bar-wrapper w-full">
-        <input id="searchInput" type="text" placeholder="¿Qué documento o funcionalidad necesitas?" autocomplete="off"
-          autocorrect="off" spellcheck="false" aria-label="Search documents" />
-        <div class="flex items-center gap-2 pl-2 flex-shrink-0">
-          <button id="searchBtn" onclick="onSearchSubmit()"
-            style="background:var(--accent);border:none;color:#ffffff;cursor:pointer;padding:10px 20px;border-radius:14px 3px 14px 3px;font-family:'Inter',sans-serif;font-size:.84rem;font-weight:700;transition:background .15s,color .15s,transform .1s;white-space:nowrap;box-shadow:0 2px 8px rgba(17,24,39,.25)"
-            onmouseover="this.style.background='var(--accent-hover)';this.style.transform='translateY(-1px)'"
-            onmouseout="this.style.background='var(--accent)';this.style.transform='none'">
-            Buscar
+    <header id="topBar" class="app-header" style="display:none">
+      <div class="app-header__inner">
+        <div class="app-header__top">
+          <button type="button" class="app-brand app-brand-btn" data-action="home" aria-label="Volver a inicio">
+            <img src="assets/atop(ai).svg" alt="atop(ai)" class="app-logo" />
           </button>
+
+          <div class="app-header__actions">
+            <button id="settingsBtn" class="btn btn--primary" style="display:none;" data-action="open-settings"
+              type="button">
+              Ajustes LLM
+            </button>
+
+            <div id="fmContainer" style="position:relative;display:none">
+              <button id="fmTriggerBtn" class="btn btn--primary" data-action="toggle-fm" aria-label="Gestionar archivos"
+                type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path
+                    d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.12 1.349l.459 1.025H13.5A1.5 1.5 0 0 1 15 5.914V12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zm8.485 0H2.5a.5.5 0 0 0-.5.5V12.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V5.914a.5.5 0 0 0-.5-.5H7.264a.5.5 0 0 1-.447-.276L6.353 3.5H2.5z" />
+                </svg>
+                <span>Gestionar archivos</span>
+                <svg id="fmChevron" class="fm-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                  fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd"
+                    d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
+                </svg>
+              </button>
+
+              <div class="fm-backdrop" id="fmBackdrop" style="display:none" data-action="close-fm"></div>
+              <div class="fm-popover popover-base" id="fmPopover" style="display:none">
+                <span class="fm-section-label">Directorio raíz</span>
+                <div class="fm-dir-row">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="fm-dir-icon" viewBox="0 0 16 16">
+                    <path
+                      d="M.5 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.12 1.349l.459 1.025H13.5A1.5 1.5 0 0 1 15 5.914V12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zM2 3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H7.586L5.586 3H2z" />
+                  </svg>
+                  <span class="fm-dir-name fm-dir-name--unset" id="fmDirName">Sin configurar</span>
+                </div>
+                <div class="fm-divider"></div>
+
+	                <button class="fm-action-btn danger" data-action="clear-database" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path
+                      d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                    <path fill-rule="evenodd"
+                      d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                  </svg>
+                  <span>Limpiar base de datos</span>
+                </button>
+              </div>
+            </div>
+
+            <button id="logoutBtn" class="btn btn--primary" data-action="logout" type="button">
+              Cerrar sesión
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Mode toggle -->
-      <div class="mode-toggle" role="group" aria-label="Search mode">
-        <button class="mode-btn active" id="modeDirectBtn" onclick="setMode('direct')" type="button">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-            <path
-              d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.243 1.656A5.5 5.5 0 1 1 8 2.5a5.5 5.5 0 0 1 0 11z" />
-          </svg>
-          <span>Búsqueda semántica</span>
-        </button>
-        <button class="mode-btn" id="modeTextBtn" onclick="setMode('text')" type="button">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-            <path
-              d="M2.244 13.081l.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.716-.43 2.078-1.011zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z" />
-          </svg>
-          <span>Búsqueda textual</span>
-        </button>
-      </div>
+        <div class="search-bar-wrapper w-full">
+          <input id="searchInput" type="text" placeholder="¿Qué documento o funcionalidad necesitas?"
+            autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search documents" />
+          <div class="flex items-center gap-2 pl-2 flex-shrink-0">
+            <button id="searchBtn" class="btn btn--primary" data-action="search" type="button">Buscar</button>
+          </div>
+        </div>
 
-      <!-- Filter Dropdown -->
-      <div id="filterContainer"
-        style="position:relative; display:flex; justify-content:center; margin: 0 auto; width: 100%;">
-        <button id="filterBtn" class="filter-btn" onclick="toggleFilterMenu(event)" type="button">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-            <path
-              d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z" />
-          </svg>
-          <span>Filtros</span>
-          <span id="filterCountBadge" class="filter-badge" style="display:none;">0</span>
-          <svg class="filter-chevron" id="filterChevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-            fill="currentColor" viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
-          </svg>
-        </button>
+        <div class="app-header__controls">
+          <div class="mode-toggle" role="group" aria-label="Search mode">
+            <button class="mode-btn active" id="modeDirectBtn" data-action="set-mode" data-mode="direct" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path
+                  d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.243 1.656A5.5 5.5 0 1 1 8 2.5a5.5 5.5 0 0 1 0 11z" />
+              </svg>
+              <span>Búsqueda semántica</span>
+            </button>
+            <button class="mode-btn" id="modeTextBtn" data-action="set-mode" data-mode="text" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path
+                  d="M2.244 13.081l.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.716-.43 2.078-1.011zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z" />
+              </svg>
+              <span>Búsqueda textual</span>
+            </button>
+          </div>
 
-        <div id="filterMenu" class="filter-popover popover-base" style="display:none;"
-          onclick="event.stopPropagation()">
+          <div id="filterContainer" style="position:relative;display:flex;justify-content:center;">
+            <button id="filterBtn" class="filter-btn" data-action="toggle-filter-menu" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path
+                  d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z" />
+              </svg>
+              <span>Filtros</span>
+              <span id="filterCountBadge" class="filter-badge" style="display:none;">0</span>
+              <svg class="filter-chevron" id="filterChevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd"
+                  d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
+              </svg>
+            </button>
 
-          <div>
+            <div id="filterBackdrop" class="filter-backdrop" data-action="close-filter-menu"></div>
+
+            <div id="filterMenu" class="filter-popover popover-base" style="display:none;" data-action="noop">
+              <div id="filterActive" class="filter-active" style="display:none">
+                <div id="filterChips" class="filter-chips"></div>
+                <button type="button" class="btn btn--link" data-action="clear-filters">Limpiar</button>
+              </div>
+
+              <div>
             <div class="filter-section-title">Por Categoría</div>
             <div class="filter-list">
-              <label class="filter-label"><input type="checkbox" value="Finanzas" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="Finanzas"
                   class="filter-cb"> Finanzas</label>
-              <label class="filter-label"><input type="checkbox" value="RRHH" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="RRHH"
                   class="filter-cb"> RRHH</label>
-              <label class="filter-label"><input type="checkbox" value="Legal" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="Legal"
                   class="filter-cb"> Legal</label>
-              <label class="filter-label"><input type="checkbox" value="Técnico" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="Técnico"
                   class="filter-cb"> Técnico</label>
-              <label class="filter-label"><input type="checkbox" value="Comercial" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="Comercial"
                   class="filter-cb"> Comercial</label>
             </div>
-          </div>
+              </div>
 
-          <div>
+              <div>
             <div class="filter-section-title">Por Tipo de Archivo</div>
             <div class="filter-list">
-              <label class="filter-label"><input type="checkbox" value="pdf" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="pdf"
                   class="filter-cb"> PDF</label>
-              <label class="filter-label"><input type="checkbox" value="xlsx" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="xlsx"
                   class="filter-cb"> Excel (XLSX)</label>
-              <label class="filter-label"><input type="checkbox" value="csv" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="csv"
                   class="filter-cb"> CSV</label>
-              <label class="filter-label"><input type="checkbox" value="txt" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="txt"
                   class="filter-cb"> Texto (TXT)</label>
-              <label class="filter-label"><input type="checkbox" value="image" onchange="toggleFilter(this)"
+              <label class="filter-label"><input type="checkbox" value="image"
                   class="filter-cb"> Imagen</label>
             </div>
-          </div>
+              </div>
 
-          <!-- Advanced Filters (ExifTool) -->
-          <div>
+              <!-- Advanced Filters (ExifTool) -->
+              <div>
             <div class="filter-section-title">Metadatos Técnicos</div>
 
             <input type="text" id="filterAuthor" placeholder="Autor del documento" class="filter-input w-full"
-              style="margin-bottom:8px; width: 100%" onchange="updateFilterBadge()">
+              style="margin-bottom:8px; width: 100%">
 
             <div class="filter-grid" style="display:flex;gap:8px;margin-bottom:8px;">
               <input type="number" id="filterMinSize" placeholder="Mín (MB)" class="filter-input" style="flex: 1;"
-                min="0" onchange="updateFilterBadge()">
+                min="0">
               <span style="color:rgba(0,0,0,.55);align-self:center;font-size:0.8rem;opacity:0.8;">-</span>
               <input type="number" id="filterMaxSize" placeholder="Máx (MB)" class="filter-input" style="flex: 1;"
-                min="0" onchange="updateFilterBadge()">
+                min="0">
             </div>
 
             <div class="filter-grid" style="display:flex;gap:8px;margin-bottom:8px;">
               <input type="number" id="filterMinYear" placeholder="Año Mín" class="filter-input" style="flex: 1;"
-                min="1900" max="2100" onchange="updateFilterBadge()">
+                min="1900" max="2100">
               <span style="color:rgba(0,0,0,.55);align-self:center;font-size:0.8rem;opacity:0.8;">-</span>
               <input type="number" id="filterMaxYear" placeholder="Año Máx" class="filter-input" style="flex: 1;"
-                min="1900" max="2100" onchange="updateFilterBadge()">
+                min="1900" max="2100">
+            </div>
+              </div>
+
             </div>
           </div>
-
         </div>
       </div>
+    </header>
+
+    <div class="app-container">
 
       <!-- Recent searches (shown in pre-search state only) -->
       <div id="recentSection" class="w-full" style="display:none; margin-top: 10px;">
         <div class="flex items-center justify-between mb-2" style="padding:0 2px">
           <span class="recent-label">Búsquedas recientes</span>
-          <button class="clear-all-btn" onclick="clearAllHistory()" type="button">Borrar todo</button>
+	          <button class="clear-all-btn" data-action="clear-history" type="button">Borrar todo</button>
         </div>
         <ul id="recentList" class="m-0 p-0 flex flex-col gap-1"></ul>
       </div>
 
       <!-- Results section -->
-      <div id="resultsSection" class="w-full mt-7 flex flex-col gap-3" style="max-width:860px;display:none">
+      <div id="resultsSection" class="w-full mt-7 flex flex-col gap-3" style="display:none">
         <div id="stateLoading" style="display:none" class="flex justify-center py-12">
           <div class="spinner"></div>
         </div>
@@ -2054,12 +2269,10 @@
           <p id="emptyText" style="margin:0;font-size:.88rem;text-align:center"></p>
         </div>
         <!-- Query Expansion Info removed (descriptive search removed) -->
-        <p id="resultsMeta"
-          style="display:none;font-size:.78rem;font-weight:700;color:rgba(0,0,0,.78);margin:0;padding-bottom: 12px;">
-        </p>
+        <p id="resultsMeta" class="results-meta"></p>
         <div id="resultsList" class="flex flex-col gap-3" style="display:none"></div>
         <div id="paginationContainer" style="display:none; justify-content:center; padding: 10px 0;">
-          <button id="loadMoreBtn" class="filter-btn" onclick="loadMoreResults()">
+          <button id="loadMoreBtn" class="btn" data-action="load-more" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
               <path
@@ -2070,8 +2283,50 @@
         </div>
       </div> <!-- Closes Results section -->
 
+      <!-- Templates (single-file components) -->
+      <template id="tplResultCard">
+        <div class="result-card" role="button" tabindex="0" data-action="open-doc">
+          <div class="result-card__head">
+            <div class="result-card__left">
+              <span class="doc-type"></span>
+              <span class="doc-title"></span>
+            </div>
+            <div class="result-card__right">
+              <span class="match-badge" hidden></span>
+              <div class="score-badge"></div>
+            </div>
+          </div>
+          <p class="fragment"></p>
+          <div class="result-card__extras" hidden>
+            <button type="button" class="btn btn--link" data-action="toggle-frags">
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+              <span class="btn-text"></span>
+            </button>
+            <div class="result-card__extra-list"></div>
+          </div>
+	          <div class="result-card__tags flex gap-1 flex-wrap"></div>
+        </div>
+      </template>
 
-    </div> <!-- Closes shellLayout -->
+      <template id="tplExtraFrag">
+        <div class="result-frag">
+          <span class="result-frag__score" hidden></span>
+          <span class="result-frag__text"></span>
+        </div>
+      </template>
+
+      <template id="tplTag">
+        <span class="tag"></span>
+      </template>
+
+      <template id="tplFilterChip">
+        <button type="button" class="filter-chip" data-action="remove-filter"></button>
+      </template>
+
+	    </div> <!-- Closes app-container -->
 
     <!-- DOCUMENT DETAIL PANEL -->
     <div class="dd-backdrop" id="ddModal" style="display:none" onclick="if(event.target===this)closeDocDetail()">
@@ -2271,9 +2526,26 @@
       async function dbSet(k, v) { const db = await openDB(); return new Promise((res, rej) => { const r = db.transaction(STORE, 'readwrite').objectStore(STORE).put(v, k); r.onsuccess = () => res(); r.onerror = () => rej(r.error) }) }
 
       /* ── Estado Global ─────────────────────────────────────────────── */
-      let currentMode = 'direct', activeFilters = [], hasSearched = false, currentQuery = '', rootDirPath = null;
-      let searchHistory = JSON.parse(localStorage.getItem('meiga-history') || '[]');
-      let fmOpen = false;
+      const state = {
+        mode: 'direct',
+        query: '',
+        hasSearched: false,
+        rootDirPath: null,
+        history: JSON.parse(localStorage.getItem('meiga-history') || '[]'),
+        ui: {
+          fmOpen: false,
+          filterMenuOpen: false,
+        },
+        filters: {
+          types: [],
+        },
+        results: {
+          all: [],
+          page: 0,
+          perPage: 10,
+          total: 0,
+        },
+      };
       const $ = id => document.getElementById(id);
 
       /* ── Autenticación ─────────────────────────────────────────────── */
@@ -2295,13 +2567,13 @@
       function applyRoleUI(role) {
         // Revelar interfaz principal
         const shell = $('shellLayout'); if (shell) shell.style.display = '';
-        const tb = $('topBar'); if (tb) tb.style.display = 'flex';
+        const tb = $('topBar'); if (tb) tb.style.display = '';
 
         // Controles solo para admin
         const fm = $('fmContainer'); if (fm) fm.style.display = role === 'admin' ? '' : 'none';
         const sb = $('settingsBtn'); if (sb) sb.style.display = role === 'admin' ? 'inline-flex' : 'none';
 
-        // Subida de archivos: admin y editor; oculto para lector
+        // (Opcional) Subida de archivos: admin y editor; oculto para lector
         const ub = $('uploadBtn');
         if (ub) ub.style.display = (role === 'admin' || role === 'editor') ? 'inline-flex' : 'none';
 
@@ -2363,12 +2635,8 @@
 
       /* ── Interfaz y Diseño ────────────────────────────────────────────── */
       function setHasSearched(v) {
-        hasSearched = v;
-        $('appTitle').style.display = 'flex';
-        $('recentSection').style.display = (!v && searchHistory.length > 0) ? 'block' : 'none';
-        const l = $('shellLayout');
-        if (v) { l.style.justifyContent = 'flex-start'; l.style.paddingTop = '40px' }
-        else { l.style.justifyContent = 'center'; l.style.paddingTop = '32px' }
+        state.hasSearched = v;
+        $('recentSection').style.display = (!v && state.history.length > 0) ? 'block' : 'none';
       }
       function showResultsState(s) {
         $('resultsSection').style.display = s === 'hidden' ? 'none' : 'block';
@@ -2388,7 +2656,7 @@
         return p.length ? p[p.length - 1] : path;
       }
       function updateDirUI(path) {
-        rootDirPath = path;
+        state.rootDirPath = path;
         const el = $('fmDirName');
         if (path) {
           el.textContent = dirName(path);
@@ -2417,7 +2685,7 @@
 
       async function handlePickedFiles(fileList) {
         if (!fileList || fileList.length === 0) {
-          if (!rootDirPath) $('pickerOverlay').style.display = 'flex';
+          if (!state.rootDirPath) $('pickerOverlay').style.display = 'flex';
           return;
         }
         const files = Array.from(fileList).filter(f => {
@@ -2426,7 +2694,7 @@
         });
         if (files.length === 0) {
           showToast('Ningún archivo compatible (.pdf, .txt, .csv, .xlsx)');
-          if (!rootDirPath) $('pickerOverlay').style.display = 'flex';
+          if (!state.rootDirPath) $('pickerOverlay').style.display = 'flex';
           return;
         }
 
@@ -2484,7 +2752,7 @@
           $('uploadProgressTitle').textContent = 'Error en la subida';
           $('uploadProgressStatus').textContent =
             'No se pudo subir ningún archivo. Comprueba que estás autenticado y que el formato es válido.';
-          if (!rootDirPath) $('pickerOverlay').style.display = 'flex';
+          if (!state.rootDirPath) $('pickerOverlay').style.display = 'flex';
           $('pickerHint').style.display = 'flex';
         }
         $('uploadProgressDoneBtn').style.display = 'inline-block';
@@ -2492,11 +2760,31 @@
 
       function closeUploadProgress() { $('uploadProgressModal').style.display = 'none'; }
 
-      function resetSearchState() { hasSearched = false; currentQuery = ''; $('searchInput').value = ''; showResultsState('hidden'); setHasSearched(false); const qei = $('queryExpansionInfo'); if (qei) qei.style.display = 'none'; }
+      function resetSearchState() {
+        state.hasSearched = false;
+        state.query = '';
+        $('searchInput').value = '';
+        showResultsState('hidden');
+        setHasSearched(false);
+        const qei = $('queryExpansionInfo');
+        if (qei) qei.style.display = 'none';
+      }
 
       /* ── File manager ──────────────────────────────────────── */
-      function toggleFmMenu() { fmOpen = !fmOpen; $('fmPopover').style.display = fmOpen ? 'flex' : 'none'; $('fmBackdrop').style.display = fmOpen ? 'block' : 'none'; $('fmChevron').style.transform = fmOpen ? 'rotate(180deg)' : '' }
-      function closeFmMenu() { fmOpen = false; $('fmPopover').style.display = 'none'; $('fmBackdrop').style.display = 'none'; $('fmChevron').style.transform = '' }
+	      function toggleFmMenu() {
+	        state.ui.fmOpen = !state.ui.fmOpen;
+	        $('fmPopover').style.display = state.ui.fmOpen ? 'flex' : 'none';
+	        $('fmBackdrop').style.display = state.ui.fmOpen ? 'block' : 'none';
+	        $('fmChevron').style.transform = state.ui.fmOpen ? 'rotate(180deg)' : '';
+	        const btn = $('fmTriggerBtn'); if (btn) btn.setAttribute('aria-expanded', state.ui.fmOpen ? 'true' : 'false');
+	      }
+	      function closeFmMenu() {
+	        state.ui.fmOpen = false;
+	        $('fmPopover').style.display = 'none';
+	        $('fmBackdrop').style.display = 'none';
+	        $('fmChevron').style.transform = '';
+	        const btn = $('fmTriggerBtn'); if (btn) btn.setAttribute('aria-expanded', 'false');
+	      }
 
       /* ── Settings modal ─────────────────────────────────────── */
       function openSettingsModal() {
@@ -2558,27 +2846,96 @@
       }
 
       /* ── Search mode ───────────────────────────────────────── */
-      function setMode(m) { currentMode = m; $('modeDirectBtn').classList.toggle('active', m === 'direct'); $('modeTextBtn').classList.toggle('active', m === 'text'); }
+      function setMode(m) {
+        state.mode = m;
+        $('modeDirectBtn').classList.toggle('active', m === 'direct');
+        $('modeTextBtn').classList.toggle('active', m === 'text');
+      }
 
       /* ── Filter Dropdown ──────────────────────────────────── */
-      let filterMenuOpen = false;
-      function toggleFilterMenu(e, forceClose = false) {
-        if (e) e.stopPropagation();
-        filterMenuOpen = forceClose ? false : !filterMenuOpen;
+	      function toggleFilterMenu(e, forceClose = false) {
+	        if (e) e.stopPropagation();
+	        state.ui.filterMenuOpen = forceClose ? false : !state.ui.filterMenuOpen;
 
-        const menu = $('filterMenu');
-        const backdrop = $('filterBackdrop');
-        const chevron = $('filterChevron');
+	        const menu = $('filterMenu');
+	        const backdrop = $('filterBackdrop');
+	        const chevron = $('filterChevron');
+	        const btn = $('filterBtn');
 
-        menu.style.display = filterMenuOpen ? 'flex' : 'none';
-        backdrop.style.display = filterMenuOpen ? 'block' : 'none';
-        if (chevron) {
-          chevron.style.transform = filterMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+	        if (menu) menu.style.display = state.ui.filterMenuOpen ? 'flex' : 'none';
+	        if (backdrop) backdrop.style.display = state.ui.filterMenuOpen ? 'block' : 'none';
+	        if (chevron) {
+	          chevron.style.transform = state.ui.filterMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+	        }
+	        if (btn) btn.setAttribute('aria-expanded', state.ui.filterMenuOpen ? 'true' : 'false');
+	      }
+
+      function renderFilterChips() {
+        const wrap = $('filterActive');
+        const chipsEl = $('filterChips');
+        const tpl = document.getElementById('tplFilterChip');
+        if (!wrap || !chipsEl || !tpl) return;
+
+        const chips = [];
+        state.filters.types.forEach(v => chips.push({ kind: 'type', value: v, label: v }));
+
+        const author = $('filterAuthor')?.value?.trim() || '';
+        const minSize = $('filterMinSize')?.value || '';
+        const maxSize = $('filterMaxSize')?.value || '';
+        const minYear = $('filterMinYear')?.value || '';
+        const maxYear = $('filterMaxYear')?.value || '';
+
+        if (author) chips.push({ kind: 'author', value: '', label: `Autor: ${author}` });
+        if (minSize) chips.push({ kind: 'min_size', value: minSize, label: `Mín: ${minSize} MB` });
+        if (maxSize) chips.push({ kind: 'max_size', value: maxSize, label: `Máx: ${maxSize} MB` });
+        if (minYear) chips.push({ kind: 'min_year', value: minYear, label: `Año ≥ ${minYear}` });
+        if (maxYear) chips.push({ kind: 'max_year', value: maxYear, label: `Año ≤ ${maxYear}` });
+
+        if (!chips.length) {
+          wrap.style.display = 'none';
+          chipsEl.replaceChildren();
+          return;
+        }
+
+        wrap.style.display = 'flex';
+        chipsEl.replaceChildren();
+        for (const c of chips) {
+          const el = tpl.content.firstElementChild.cloneNode(true);
+          el.textContent = c.label;
+          el.dataset.kind = c.kind;
+          el.dataset.value = c.value;
+          chipsEl.appendChild(el);
         }
       }
 
+      function clearAllFilters() {
+        state.filters.types = [];
+        document.querySelectorAll('.filter-cb').forEach(cb => { cb.checked = false; });
+        const ids = ['filterAuthor', 'filterMinSize', 'filterMaxSize', 'filterMinYear', 'filterMaxYear'];
+        ids.forEach(id => { const el = $(id); if (el) el.value = ''; });
+        updateFilterBadge();
+      }
+
+      function removeFilterChip(kind, value) {
+        if (kind === 'type') {
+          state.filters.types = state.filters.types.filter(v => v !== value);
+          document.querySelectorAll('.filter-cb').forEach(cb => { if (cb.value === value) cb.checked = false; });
+        } else if (kind === 'author') {
+          const el = $('filterAuthor'); if (el) el.value = '';
+        } else if (kind === 'min_size') {
+          const el = $('filterMinSize'); if (el) el.value = '';
+        } else if (kind === 'max_size') {
+          const el = $('filterMaxSize'); if (el) el.value = '';
+        } else if (kind === 'min_year') {
+          const el = $('filterMinYear'); if (el) el.value = '';
+        } else if (kind === 'max_year') {
+          const el = $('filterMaxYear'); if (el) el.value = '';
+        }
+        updateFilterBadge();
+      }
+
       function updateFilterBadge() {
-        let count = activeFilters.length;
+        let count = state.filters.types.length;
         const author = $('filterAuthor').value.trim();
         const minSize = $('filterMinSize').value;
         const maxSize = $('filterMaxSize').value;
@@ -2601,29 +2958,166 @@
           $('filterBtn').classList.remove('filter-btn--active');
         }
 
+        renderFilterChips();
+
         // Re-ejecutar búsqueda automáticamente si ya hay una query activa
-        if (currentQuery) performSearch(currentQuery);
+        if (state.query) performSearch(state.query);
       }
 
-      function toggleFilter(checkbox) {
-        const t = checkbox.value;
-        const i = activeFilters.indexOf(t);
-        if (checkbox.checked && i === -1) {
-          activeFilters.push(t);
-        } else if (!checkbox.checked && i > -1) {
-          activeFilters.splice(i, 1);
-        }
-        updateFilterBadge();
-      }
+	      function toggleFilter(checkbox) {
+	        const t = checkbox.value;
+	        const i = state.filters.types.indexOf(t);
+	        if (checkbox.checked && i === -1) {
+	          state.filters.types.push(t);
+	        } else if (!checkbox.checked && i > -1) {
+	          state.filters.types.splice(i, 1);
+	        }
+	        updateFilterBadge();
+	      }
+	
+	      /* ── Acciones (delegación de eventos) ─────────────────────────────── */
+	      function toggleResultCardFragments(toggleBtn) {
+	        const card = toggleBtn?.closest?.('.result-card');
+	        if (!card) return;
+	        const extraList = card.querySelector('.result-card__extra-list');
+	        if (!extraList) return;
+	
+	        const open = toggleBtn.dataset.open === '1';
+	        const nextOpen = !open;
+	        toggleBtn.dataset.open = nextOpen ? '1' : '0';
+	        toggleBtn.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+	        extraList.style.display = nextOpen ? 'block' : 'none';
+	
+	        const chevron = toggleBtn.querySelector('.chevron');
+	        if (chevron) chevron.style.transform = nextOpen ? 'rotate(180deg)' : '';
+	
+	        const n = Number(toggleBtn.dataset.extraCount || extraList.childElementCount || 0);
+	        const txt = toggleBtn.querySelector('.btn-text');
+	        if (txt) {
+	          txt.textContent = nextOpen ? 'Ocultar coincidencias' : `Ver ${n} coincidencia${n !== 1 ? 's' : ''} más`;
+	        }
+	      }
+	
+	      function initFilterBindings() {
+	        const menu = $('filterMenu');
+	        if (menu) {
+	          menu.addEventListener('change', (e) => {
+	            const cb = e.target?.closest?.('.filter-cb');
+	            if (cb) toggleFilter(cb);
+	          });
+	        }
+	
+	        const ids = ['filterAuthor', 'filterMinSize', 'filterMaxSize', 'filterMinYear', 'filterMaxYear'];
+	        ids.forEach((id) => {
+	          const el = $(id);
+	          if (el) el.addEventListener('change', () => updateFilterBadge());
+	        });
+	      }
+	
+	      function initActionDelegation() {
+	        document.addEventListener('click', (e) => {
+	          const el = e.target?.closest?.('[data-action]');
+	          if (!el) return;
+	          const action = el.dataset.action;
+	          if (!action || action === 'noop') return;
+	
+	          if (action === 'toggle-frags') {
+	            e.preventDefault();
+	            e.stopPropagation();
+	            toggleResultCardFragments(el);
+	            return;
+	          }
+	
+	          if (action === 'open-doc') {
+	            const card = el.closest?.('.result-card');
+	            if (e.target?.closest?.('.result-card__extra-list')) return;
+	            const source = card?.dataset?.source;
+	            if (source) openDocDetail(source);
+	            return;
+	          }
+	
+	          switch (action) {
+	            case 'home':
+	              closeFmMenu();
+	              toggleFilterMenu(null, true);
+	              try { closeDocDetail?.(); } catch { }
+	              resetSearchState();
+	              break;
+	            case 'search':
+	              onSearchSubmit();
+	              break;
+	            case 'set-mode': {
+	              const m = el.dataset.mode;
+	              if (m) {
+	                setMode(m);
+	                if (state.query) performSearch(state.query);
+	              }
+	              break;
+	            }
+	            case 'toggle-filter-menu':
+	              toggleFilterMenu(e);
+	              break;
+	            case 'close-filter-menu':
+	              toggleFilterMenu(null, true);
+	              break;
+	            case 'clear-filters':
+	              clearAllFilters();
+	              break;
+	            case 'remove-filter':
+	              removeFilterChip(el.dataset.kind || '', el.dataset.value || '');
+	              break;
+	            case 'toggle-fm':
+	              toggleFmMenu();
+	              break;
+	            case 'close-fm':
+	              closeFmMenu();
+	              break;
+	            case 'clear-database':
+	              clearDatabase();
+	              break;
+	            case 'open-settings':
+	              openSettingsModal();
+	              break;
+	            case 'logout':
+	              logoutUser();
+	              break;
+	            case 'load-more':
+	              loadMoreResults();
+	              break;
+	            case 'clear-history':
+	              clearAllHistory();
+	              break;
+	            default:
+	              break;
+	          }
+	        });
+	
+	        document.addEventListener('keydown', (e) => {
+	          if (e.key === 'Escape') {
+	            if (state.ui.filterMenuOpen) toggleFilterMenu(null, true);
+	            if (state.ui.fmOpen) closeFmMenu();
+	            return;
+	          }
+	
+	          if (e.key !== 'Enter') return;
+	          const tag = e.target?.tagName;
+	          if (tag && ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+	
+	          const el = e.target;
+	          if (el?.dataset?.action !== 'open-doc') return;
+	          const source = el?.dataset?.source;
+	          if (source) openDocDetail(source);
+	        });
+	      }
 
-      /* ── Historial de Búsqueda ───────────────────────────────────────────── */
-      function saveHistory() { localStorage.setItem('meiga-history', JSON.stringify(searchHistory)) }
-      function addToHistory(q) { searchHistory = [q, ...searchHistory.filter(h => h !== q)].slice(0, 8); saveHistory() }
-      function removeFromHistory(q) { searchHistory = searchHistory.filter(h => h !== q); saveHistory(); renderHistory() }
-      function clearAllHistory() { searchHistory = []; saveHistory(); renderHistory() }
+	      /* ── Historial de Búsqueda ───────────────────────────────────────────── */
+	      function saveHistory() { localStorage.setItem('meiga-history', JSON.stringify(state.history)) }
+	      function addToHistory(q) { state.history = [q, ...state.history.filter(h => h !== q)].slice(0, 8); saveHistory() }
+      function removeFromHistory(q) { state.history = state.history.filter(h => h !== q); saveHistory(); renderHistory() }
+      function clearAllHistory() { state.history = []; saveHistory(); renderHistory() }
       function renderHistory() {
         const list = $('recentList'); if (!list) return;
-        list.innerHTML = searchHistory.map((item, idx) => `
+        list.innerHTML = state.history.map((item, idx) => `
     <li class="recent-item" data-query="${esc(item).replace(/"/g, '&quot;')}">
       <svg class="item-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
       <span class="item-text">${esc(item)}</span>
@@ -2638,14 +3132,12 @@
           const li = e.target.closest('[data-query]');
           if (li) selectHistory(li.dataset.query);
         };
-        $('recentSection').style.display = (!hasSearched && searchHistory.length > 0) ? 'block' : 'none';
+        $('recentSection').style.display = (!state.hasSearched && state.history.length > 0) ? 'block' : 'none';
       }
       function selectHistory(q) { $('searchInput').value = q; onSearchSubmit() }
 
       /* ── MOTOR DE BÚSQUEDA (Interacción con Backend) ───────── */
-      let allResults = [];
-      let currentResultsPage = 0;
-      const RESULTS_PER_PAGE = 10;
+      // state.results.* es la fuente de verdad para paginación y resultados.
 
       /**
        * ¿QUÉ PASA CUANDO BUSCAS ALGO?
@@ -2655,7 +3147,10 @@
        */
       function onSearchSubmit() {
         const q = $('searchInput').value.trim(); if (!q) return;
-        currentQuery = q; addToHistory(q); setHasSearched(true); performSearch(q);
+        state.query = q;
+        addToHistory(q);
+        setHasSearched(true);
+        performSearch(q);
       }
 
       /**
@@ -2671,9 +3166,9 @@
         showResultsState('loading');
         $('paginationContainer').style.display = 'none';
         try {
-          const isText = currentMode === 'text';
+          const isText = state.mode === 'text';
           const p = new URLSearchParams({ q, top_k: 1000, mode: isText ? 'text' : 'semantic' });
-          activeFilters.forEach(t => p.append('type', t));
+          state.filters.types.forEach(t => p.append('type', t));
 
           const minSize = $('filterMinSize').value;
           const maxSize = $('filterMaxSize').value;
@@ -2697,8 +3192,9 @@
           const n = data.total;
           $('resultsMeta').textContent = `${n} documento${n !== 1 ? 's' : ''} encontrado${n !== 1 ? 's' : ''}`;
 
-          allResults = data.results;
-          currentResultsPage = 1;
+          state.results.all = data.results;
+          state.results.total = n;
+          state.results.page = 1;
           renderResultsPage(false);
 
           showResultsState('results');
@@ -2706,89 +3202,114 @@
       }
 
       function renderResultsPage(append = false) {
-        const start = (currentResultsPage - 1) * RESULTS_PER_PAGE;
-        const end = start + RESULTS_PER_PAGE;
-        const pageResults = allResults.slice(start, end);
-        const html = pageResults.map(renderCard).join('');
+        const start = (state.results.page - 1) * state.results.perPage;
+        const end = start + state.results.perPage;
+        const pageResults = state.results.all.slice(start, end);
 
         const list = $('resultsList');
-        if (append) {
-          list.insertAdjacentHTML('beforeend', html);
-        } else {
-          list.innerHTML = html;
-        }
+        if (!append) list.replaceChildren();
+        const frag = document.createDocumentFragment();
+        for (const r of pageResults) frag.appendChild(buildResultCardElement(r));
+        list.appendChild(frag);
 
         const pContainer = $('paginationContainer');
         if (pContainer) {
-          pContainer.style.display = end < allResults.length ? 'flex' : 'none';
+          pContainer.style.display = end < state.results.all.length ? 'flex' : 'none';
         }
       }
 
       function loadMoreResults() {
-        currentResultsPage++;
+        state.results.page++;
         renderResultsPage(true);
       }
 
       /* ── Tarjeta de Resultado (Agrupado por documento) ─────────────────── */
-      let _cardIdCounter = 0;
-      function renderCard(r) {
-        const doc = r.document;
+      function buildResultCardElement(r) {
+        const tpl = document.getElementById('tplResultCard');
+        const tplExtra = document.getElementById('tplExtraFrag');
+        const tplTag = document.getElementById('tplTag');
+        if (!tpl) return document.createElement('div');
+
+        const doc = r.document || {};
         const frags = r.fragments || [];
-        const score = Math.round(r.relevanceScore * 100);
+        const score = Math.round((r.relevanceScore || 0) * 100);
         const matchCount = r.matchCount || frags.length;
         const bestFrag = frags[0];
         const extraFrags = frags.slice(1);
-        const cardId = `frags-${_cardIdCounter++}`;
 
-        const bestFragHtml = bestFrag
-          ? applyHighlights(esc(bestFrag.text), bestFrag.highlights || [])
-          : '';
+        const card = tpl.content.firstElementChild.cloneNode(true);
+        const source = doc.source || '';
+        card.dataset.source = source;
+        card.setAttribute('aria-label', doc.title ? String(doc.title) : 'Documento');
 
-        const tagsHtml = (doc.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('');
+        const typeEl = card.querySelector('.doc-type');
+        const titleEl = card.querySelector('.doc-title');
+        const scoreEl = card.querySelector('.score-badge');
+        const matchEl = card.querySelector('.match-badge');
+        const fragEl = card.querySelector('.fragment');
+        const tagsWrap = card.querySelector('.result-card__tags');
+        const extrasWrap = card.querySelector('.result-card__extras');
+        const extraList = card.querySelector('.result-card__extra-list');
+        const toggleBtn = extrasWrap?.querySelector('[data-action="toggle-frags"]');
 
-        // Extra fragments HTML (hidden by default)
-        let extraHtml = '';
-        if (extraFrags.length > 0) {
-          const extraItems = extraFrags.map(f => {
-            const fHtml = applyHighlights(esc(f.text), f.highlights || []);
-            const fScore = f.score ? Math.round(f.score * 100) : '';
-            return `<div style="padding:10px 14px;border-bottom:1px solid rgba(20,33,61,0.05);font-size:.82rem;line-height:1.5;color:rgba(20,33,61,.75)">
-              ${fScore ? `<span style="font-size:.7rem;font-weight:600;color:rgba(20,33,61,.35);margin-right:6px">${fScore}%</span>` : ''}
-              ${fHtml}
-            </div>`;
-          }).join('');
-          extraHtml = `
-            <button onclick="event.stopPropagation();var el=document.getElementById('${cardId}');var open=el.style.display!=='none';el.style.display=open?'none':'block';this.querySelector('.chevron').style.transform=open?'':'rotate(180deg)';this.querySelector('.btn-text').textContent=open?'Ver ${extraFrags.length} coincidencia${extraFrags.length > 1 ? 's' : ''} más':'Ocultar coincidencias'" 
-              style="background:none;border:none;cursor:pointer;font-size:.78rem;color:var(--accent);font-weight:600;padding:6px 0;display:flex;align-items:center;gap:4px;margin-top:4px">
-              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
-              <span class="btn-text">Ver ${extraFrags.length} coincidencia${extraFrags.length > 1 ? 's' : ''} más</span>
-            </button>
-            <div id="${cardId}" style="display:none;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:rgba(17,24,39,0.04);margin-top:6px;max-height:300px;overflow-y:auto">
-              ${extraItems}
-            </div>`;
+        if (typeEl) typeEl.textContent = String((doc.type || '').toUpperCase());
+        if (titleEl) { titleEl.textContent = String(doc.title || ''); titleEl.title = String(doc.title || ''); }
+        if (scoreEl) { scoreEl.textContent = `${score}%`; scoreEl.title = `Relevance: ${score}%`; }
+
+        if (matchEl) {
+          if (matchCount > 1) { matchEl.hidden = false; matchEl.textContent = `${matchCount} coincidencias`; }
+          else matchEl.hidden = true;
         }
 
-        return `<div class="result-card" role="button" tabindex="0" aria-label="${esc(doc.title)}" onkeydown="if(event.key==='Enter')openDocDetail('${esc(doc.source).replace(/'/g, "\\'")}')" style="cursor:pointer">
-    <div class="flex items-start justify-between gap-3 mb-2" onclick="openDocDetail('${esc(doc.source).replace(/'/g, "\\'")}')">
-      <div class="flex flex-col gap-0.5 min-w-0">
-        <span class="doc-type">${esc(doc.type.toUpperCase())}</span>
-        <span class="doc-title" title="${esc(doc.title)}">${esc(doc.title)}</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-	        ${matchCount > 1 ? `<span style="font-size:.7rem;font-weight:600;color:#000000;background:rgba(17,24,39,.08);padding:3px 8px;border-radius:10px">${matchCount} coincidencias</span>` : ''}
-	        <div class="score-badge" title="Relevance: ${score}%">${score}%</div>
-	      </div>
-    </div>
-    <p class="fragment" onclick="openDocDetail('${esc(doc.source).replace(/'/g, "\\'")}')">${bestFragHtml}</p>
-    ${extraHtml}
-    <div class="flex items-center gap-2 flex-wrap" style="margin-top:4px">
-      ${tagsHtml ? `<div class="flex gap-1 flex-wrap">${tagsHtml}</div>` : ''}
-    </div>
-  </div>`;
-      }
+        const bestFragHtml = bestFrag ? applyHighlights(esc(bestFrag.text), bestFrag.highlights || []) : '';
+        if (fragEl) fragEl.innerHTML = bestFragHtml;
+
+        // Tags
+        if (tagsWrap) {
+          tagsWrap.replaceChildren();
+          for (const t of (doc.tags || [])) {
+            const tagEl = tplTag ? tplTag.content.firstElementChild.cloneNode(true) : document.createElement('span');
+            tagEl.className = 'tag';
+            tagEl.textContent = String(t);
+            tagsWrap.appendChild(tagEl);
+          }
+        }
+
+	        // Extra fragments
+	        if (extrasWrap && extraList && toggleBtn && extraFrags.length > 0) {
+	          extrasWrap.hidden = false;
+	          extraList.style.display = 'none';
+	          toggleBtn.dataset.open = '0';
+	          toggleBtn.dataset.extraCount = String(extraFrags.length);
+	          toggleBtn.setAttribute('aria-expanded', 'false');
+	          const n = extraFrags.length;
+	          const label = `Ver ${n} coincidencia${n > 1 ? 's' : ''} más`;
+	          const txt = toggleBtn.querySelector('.btn-text');
+	          if (txt) txt.textContent = label;
+
+          extraList.replaceChildren();
+          for (const f of extraFrags) {
+            const item = tplExtra ? tplExtra.content.firstElementChild.cloneNode(true) : document.createElement('div');
+            const sEl = item.querySelector?.('.result-frag__score');
+            const tEl = item.querySelector?.('.result-frag__text');
+            const fScore = f.score ? Math.round(f.score * 100) : '';
+            if (sEl) {
+              if (fScore !== '') { sEl.hidden = false; sEl.textContent = `${fScore}%`; } else sEl.hidden = true;
+            }
+            const fHtml = applyHighlights(esc(f.text), f.highlights || []);
+            if (tEl) tEl.innerHTML = fHtml;
+            else item.innerHTML = fHtml;
+            extraList.appendChild(item);
+          }
+	        } else if (extrasWrap) {
+	          extrasWrap.hidden = true;
+	        }
+
+	        return card;
+	      }
       const STOP_WORDS = new Set(['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'del', 'al', 'en', 'por', 'con', 'para', 'sin', 'sobre', 'entre', 'hacia', 'desde', 'como', 'que', 'se', 'su', 'sus', 'lo', 'es', 'son', 'no', 'si', 'ya', 'más', 'muy', 'pero', 'este', 'esta', 'estos', 'estas', 'ese', 'esa', 'esos', 'esas', 'todo', 'toda', 'todos', 'todas', 'otro', 'otra', 'otros', 'otras', 'the', 'of', 'and', 'in', 'to', 'for', 'is', 'on', 'with', 'at', 'by', 'an', 'or', 'not', 'are', 'was', 'be', 'has', 'had', 'its', 'from', 'this', 'that', 'which', 'also']);
       function applyHighlights(t, _hl) {
-        const q = (currentQuery || '').trim();
+        const q = (state.query || '').trim();
         if (!q) return t;
         const words = q.split(/\s+/).filter(w => w.length >= 2 && !STOP_WORDS.has(w.toLowerCase()));
         if (!words.length) return t;
@@ -2971,30 +3492,30 @@
       /* ── Subida mediante Arrastrar y Soltar (Drag and Drop) ───────── */
       let dragCounter = 0;
 
-      window.addEventListener('dragenter', (e) => {
-        e.preventDefault();
-        // Solo activamos D&D si hay un rootDir configurado y el usuario puede subir
-        if (!rootDirPath || window._userRole === 'lector') return;
-        dragCounter++;
-        $('dragOverlay').classList.add('active');
-      });
+	      window.addEventListener('dragenter', (e) => {
+	        e.preventDefault();
+	        // Solo activamos D&D si hay un rootDir configurado y el usuario puede subir
+	        if (!state.rootDirPath || window._userRole === 'lector') return;
+	        dragCounter++;
+	        $('dragOverlay').classList.add('active');
+	      });
 
-      window.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        if (!rootDirPath || window._userRole === 'lector') return;
-        dragCounter--;
-        if (dragCounter === 0) {
-          $('dragOverlay').classList.remove('active');
-        }
-      });
+	      window.addEventListener('dragleave', (e) => {
+	        e.preventDefault();
+	        if (!state.rootDirPath || window._userRole === 'lector') return;
+	        dragCounter--;
+	        if (dragCounter === 0) {
+	          $('dragOverlay').classList.remove('active');
+	        }
+	      });
 
       window.addEventListener('dragover', (e) => {
         e.preventDefault(); // Obligatorio para permitir el drop
       });
 
-      window.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        if (!rootDirPath || window._userRole === 'lector') return;
+	      window.addEventListener('drop', async (e) => {
+	        e.preventDefault();
+	        if (!state.rootDirPath || window._userRole === 'lector') return;
 
         dragCounter = 0;
         $('dragOverlay').classList.remove('active');
@@ -3036,11 +3557,13 @@
 
 
 
-      /* ── Escuchadores de Eventos ───────────────────────────── */
-      $('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') onSearchSubmit() });
+	      /* ── Escuchadores de Eventos ───────────────────────────── */
+	      $('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') onSearchSubmit() });
+	      initFilterBindings();
+	      initActionDelegation();
 
-      /* ── Inicialización (Boot) ────────────────────────────── */
-      (async () => { renderHistory(); await loadStoredDirectory() })();
+	      /* ── Inicialización (Boot) ────────────────────────────── */
+	      (async () => { renderHistory(); await loadStoredDirectory() })();
 
       /* ── Starfield Background Animation ─────────────────────
          Draws small pixelated "+" stars in #ffab00 that gently
