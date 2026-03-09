@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     
     # Identificadores específicos de modelo para cada proveedor en la nube.
     OPENAI_LLM_MODEL: str = "gpt-4o-mini"
-    GEMINI_LLM_MODEL: str = "gemini-2.5-flash"
+    GEMINI_LLM_MODEL: str = "gemini-2.0-flash"
     CLAUDE_LLM_MODEL: str = "claude-3-haiku-20240307"
 
     # ─── Parámetros de Procesamiento de Documentos ───
