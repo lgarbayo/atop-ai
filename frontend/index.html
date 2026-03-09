@@ -2205,88 +2205,6 @@
               <span>Búsqueda textual</span>
             </button>
           </div>
-
-          <div id="filterContainer" style="position:relative;display:flex;justify-content:center;">
-            <button id="filterBtn" class="filter-btn" data-action="toggle-filter-menu" type="button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                <path
-                  d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z" />
-              </svg>
-              <span>Filtros</span>
-              <span id="filterCountBadge" class="filter-badge" style="display:none;">0</span>
-              <svg class="filter-chevron" id="filterChevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd"
-                  d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
-              </svg>
-            </button>
-
-            <div id="filterBackdrop" class="filter-backdrop" data-action="close-filter-menu"></div>
-
-            <div id="filterMenu" class="filter-popover popover-base" style="display:none;" data-action="noop">
-              <div id="filterActive" class="filter-active" style="display:none">
-                <div id="filterChips" class="filter-chips"></div>
-                <button type="button" class="btn btn--link" data-action="clear-filters">Limpiar</button>
-              </div>
-
-              <div>
-            <div class="filter-section-title">Por Categoría</div>
-            <div class="filter-list">
-              <label class="filter-label"><input type="checkbox" value="Finanzas"
-                  class="filter-cb"> Finanzas</label>
-              <label class="filter-label"><input type="checkbox" value="RRHH"
-                  class="filter-cb"> RRHH</label>
-              <label class="filter-label"><input type="checkbox" value="Legal"
-                  class="filter-cb"> Legal</label>
-              <label class="filter-label"><input type="checkbox" value="Técnico"
-                  class="filter-cb"> Técnico</label>
-              <label class="filter-label"><input type="checkbox" value="Comercial"
-                  class="filter-cb"> Comercial</label>
-            </div>
-              </div>
-
-              <div>
-            <div class="filter-section-title">Por Tipo de Archivo</div>
-            <div class="filter-list">
-              <label class="filter-label"><input type="checkbox" value="pdf"
-                  class="filter-cb"> PDF</label>
-              <label class="filter-label"><input type="checkbox" value="xlsx"
-                  class="filter-cb"> Excel (XLSX)</label>
-              <label class="filter-label"><input type="checkbox" value="csv"
-                  class="filter-cb"> CSV</label>
-              <label class="filter-label"><input type="checkbox" value="txt"
-                  class="filter-cb"> Texto (TXT)</label>
-              <label class="filter-label"><input type="checkbox" value="image"
-                  class="filter-cb"> Imagen</label>
-            </div>
-              </div>
-
-              <!-- Advanced Filters (ExifTool) -->
-              <div>
-            <div class="filter-section-title">Metadatos Técnicos</div>
-
-            <input type="text" id="filterAuthor" placeholder="Autor del documento" class="filter-input w-full"
-              style="margin-bottom:8px; width: 100%">
-
-            <div class="filter-grid" style="display:flex;gap:8px;margin-bottom:8px;">
-              <input type="number" id="filterMinSize" placeholder="Mín (MB)" class="filter-input" style="flex: 1;"
-                min="0">
-              <span style="color:rgba(0,0,0,.55);align-self:center;font-size:0.8rem;opacity:0.8;">-</span>
-              <input type="number" id="filterMaxSize" placeholder="Máx (MB)" class="filter-input" style="flex: 1;"
-                min="0">
-            </div>
-
-            <div class="filter-grid" style="display:flex;gap:8px;margin-bottom:8px;">
-              <input type="number" id="filterMinYear" placeholder="Año Mín" class="filter-input" style="flex: 1;"
-                min="1900" max="2100">
-              <span style="color:rgba(0,0,0,.55);align-self:center;font-size:0.8rem;opacity:0.8;">-</span>
-              <input type="number" id="filterMaxYear" placeholder="Año Máx" class="filter-input" style="flex: 1;"
-                min="1900" max="2100">
-            </div>
-              </div>
-
-            </div>
-          </div>
         </div>
       </div>
     </header>
@@ -2414,13 +2332,17 @@
             <div class="spinner" style="width:24px;height:24px;margin:0 auto"></div>
           </div>
         </div>
-        <div id="ddExif"
-          style="padding: 20px 28px; border-top: 1px solid rgba(20,33,61,0.08); background: #f9fafb; display: none; overflow-y: auto; max-height: 250px;">
-        </div>
         <div class="dd-source" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
           <span class="dd-source-path" id="ddSource"
             style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
           <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="dd-chat-toggle" id="ddMetadataToggle" onclick="toggleMetadataModal()" style="display:none;" title="Ver Metadatos Técnicos">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg>
+              Metadatos
+            </button>
             <button class="dd-chat-toggle" id="ddSummaryToggle" onclick="toggleDocSummary()">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
                 <path
@@ -2463,13 +2385,29 @@
             <button id="ddChatSend" class="dd-chat-send" onclick="sendChatMessage()">Enviar</button>
           </div>
         </div>
+      </div>
+    </div>
 
+    <!-- METADATA MODAL -->
+    <div class="dd-backdrop" id="metadataModal" style="display:none;z-index:9999" onclick="if(event.target===this)this.style.display='none'">
+      <div class="dd-modal" style="height:auto;display:flex;flex-direction:column;max-width:700px;width:90%">
+        <div class="dd-header">
+          <h2 id="metadataTitle">Metadatos Técnicos</h2>
+          <button class="dd-close" onclick="document.getElementById('metadataModal').style.display='none'" aria-label="Cerrar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path
+                d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+            </svg>
+          </button>
+        </div>
+        <div id="metadataModalContent" style="padding: 20px 28px; background: #f9fafb; overflow-y: auto; max-height: 80vh;">
+        </div>
       </div>
     </div>
 
     <!-- SETTINGS MODAL -->
     <dialog id="settingsModal" class="settings-dialog">
-      <h2>&#9881;&#65039;&nbsp; Configuración Google Gemini</h2>
+      <h2>Configuración Google Gemini</h2>
       
       <div id="settingsApiKeyRow">
         <label for="settingsApiKey">Gemini API Key</label>
@@ -2590,11 +2528,7 @@
         rootDirPath: null,
         history: JSON.parse(localStorage.getItem('meiga-history') || '[]'),
         ui: {
-          fmOpen: false,
-          filterMenuOpen: false,
-        },
-        filters: {
-          types: [],
+          fmOpen: false
         },
         results: {
           all: [],
@@ -2928,129 +2862,7 @@
         $('modeTextBtn').classList.toggle('active', m === 'text');
       }
 
-      /* ── Filter Dropdown ──────────────────────────────────── */
-	      function toggleFilterMenu(e, forceClose = false) {
-	        if (e) e.stopPropagation();
-	        state.ui.filterMenuOpen = forceClose ? false : !state.ui.filterMenuOpen;
 
-	        const menu = $('filterMenu');
-	        const backdrop = $('filterBackdrop');
-	        const chevron = $('filterChevron');
-	        const btn = $('filterBtn');
-
-	        if (menu) menu.style.display = state.ui.filterMenuOpen ? 'flex' : 'none';
-	        if (backdrop) backdrop.style.display = state.ui.filterMenuOpen ? 'block' : 'none';
-	        if (chevron) {
-	          chevron.style.transform = state.ui.filterMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-	        }
-	        if (btn) btn.setAttribute('aria-expanded', state.ui.filterMenuOpen ? 'true' : 'false');
-	      }
-
-      function renderFilterChips() {
-        const wrap = $('filterActive');
-        const chipsEl = $('filterChips');
-        const tpl = document.getElementById('tplFilterChip');
-        if (!wrap || !chipsEl || !tpl) return;
-
-        const chips = [];
-        state.filters.types.forEach(v => chips.push({ kind: 'type', value: v, label: v }));
-
-        const author = $('filterAuthor')?.value?.trim() || '';
-        const minSize = $('filterMinSize')?.value || '';
-        const maxSize = $('filterMaxSize')?.value || '';
-        const minYear = $('filterMinYear')?.value || '';
-        const maxYear = $('filterMaxYear')?.value || '';
-
-        if (author) chips.push({ kind: 'author', value: '', label: `Autor: ${author}` });
-        if (minSize) chips.push({ kind: 'min_size', value: minSize, label: `Mín: ${minSize} MB` });
-        if (maxSize) chips.push({ kind: 'max_size', value: maxSize, label: `Máx: ${maxSize} MB` });
-        if (minYear) chips.push({ kind: 'min_year', value: minYear, label: `Año ≥ ${minYear}` });
-        if (maxYear) chips.push({ kind: 'max_year', value: maxYear, label: `Año ≤ ${maxYear}` });
-
-        if (!chips.length) {
-          wrap.style.display = 'none';
-          chipsEl.replaceChildren();
-          return;
-        }
-
-        wrap.style.display = 'flex';
-        chipsEl.replaceChildren();
-        for (const c of chips) {
-          const el = tpl.content.firstElementChild.cloneNode(true);
-          el.textContent = c.label;
-          el.dataset.kind = c.kind;
-          el.dataset.value = c.value;
-          chipsEl.appendChild(el);
-        }
-      }
-
-      function clearAllFilters() {
-        state.filters.types = [];
-        document.querySelectorAll('.filter-cb').forEach(cb => { cb.checked = false; });
-        const ids = ['filterAuthor', 'filterMinSize', 'filterMaxSize', 'filterMinYear', 'filterMaxYear'];
-        ids.forEach(id => { const el = $(id); if (el) el.value = ''; });
-        updateFilterBadge();
-      }
-
-      function removeFilterChip(kind, value) {
-        if (kind === 'type') {
-          state.filters.types = state.filters.types.filter(v => v !== value);
-          document.querySelectorAll('.filter-cb').forEach(cb => { if (cb.value === value) cb.checked = false; });
-        } else if (kind === 'author') {
-          const el = $('filterAuthor'); if (el) el.value = '';
-        } else if (kind === 'min_size') {
-          const el = $('filterMinSize'); if (el) el.value = '';
-        } else if (kind === 'max_size') {
-          const el = $('filterMaxSize'); if (el) el.value = '';
-        } else if (kind === 'min_year') {
-          const el = $('filterMinYear'); if (el) el.value = '';
-        } else if (kind === 'max_year') {
-          const el = $('filterMaxYear'); if (el) el.value = '';
-        }
-        updateFilterBadge();
-      }
-
-      function updateFilterBadge() {
-        let count = state.filters.types.length;
-        const author = $('filterAuthor').value.trim();
-        const minSize = $('filterMinSize').value;
-        const maxSize = $('filterMaxSize').value;
-        const minYear = $('filterMinYear').value;
-        const maxYear = $('filterMaxYear').value;
-
-        if (author) count++;
-        if (minSize) count++;
-        if (maxSize) count++;
-        if (minYear) count++;
-        if (maxYear) count++;
-
-        const badge = $('filterCountBadge');
-        if (count > 0) {
-          badge.style.display = 'inline-block';
-          badge.textContent = count;
-          $('filterBtn').classList.add('filter-btn--active');
-        } else {
-          badge.style.display = 'none';
-          $('filterBtn').classList.remove('filter-btn--active');
-        }
-
-        renderFilterChips();
-
-        // Re-ejecutar búsqueda automáticamente si ya hay una query activa
-        if (state.query) performSearch(state.query);
-      }
-
-	      function toggleFilter(checkbox) {
-	        const t = checkbox.value;
-	        const i = state.filters.types.indexOf(t);
-	        if (checkbox.checked && i === -1) {
-	          state.filters.types.push(t);
-	        } else if (!checkbox.checked && i > -1) {
-	          state.filters.types.splice(i, 1);
-	        }
-	        updateFilterBadge();
-	      }
-	
 	      /* ── Acciones (delegación de eventos) ─────────────────────────────── */
 	      function toggleResultCardFragments(toggleBtn) {
 	        const card = toggleBtn?.closest?.('.result-card');
@@ -3115,7 +2927,6 @@
 	          switch (action) {
 	            case 'home':
 	              closeFmMenu();
-	              toggleFilterMenu(null, true);
 	              try { closeDocDetail?.(); } catch { }
 	              resetSearchState();
 	              break;
@@ -3130,18 +2941,7 @@
 	              }
 	              break;
 	            }
-	            case 'toggle-filter-menu':
-	              toggleFilterMenu(e);
-	              break;
-	            case 'close-filter-menu':
-	              toggleFilterMenu(null, true);
-	              break;
-	            case 'clear-filters':
-	              clearAllFilters();
-	              break;
-	            case 'remove-filter':
-	              removeFilterChip(el.dataset.kind || '', el.dataset.value || '');
-	              break;
+
 	            case 'toggle-fm':
 	              toggleFmMenu();
 	              break;
@@ -3171,7 +2971,6 @@
 	
 	        document.addEventListener('keydown', (e) => {
 	          if (e.key === 'Escape') {
-	            if (state.ui.filterMenuOpen) toggleFilterMenu(null, true);
 	            if (state.ui.fmOpen) closeFmMenu();
 	            return;
 	          }
@@ -3248,19 +3047,6 @@
         try {
           const isText = state.mode === 'text';
           const p = new URLSearchParams({ q, top_k: 1000, mode: isText ? 'text' : 'semantic' });
-          state.filters.types.forEach(t => p.append('type', t));
-
-          const minSize = $('filterMinSize').value;
-          const maxSize = $('filterMaxSize').value;
-          const author = $('filterAuthor').value.trim();
-          const minYear = $('filterMinYear').value;
-          const maxYear = $('filterMaxYear').value;
-
-          if (minSize) p.append('min_size', Math.round(minSize * 1024 * 1024));
-          if (maxSize) p.append('max_size', Math.round(maxSize * 1024 * 1024));
-          if (author) p.append('author', author);
-          if (minYear) p.append('min_year', minYear);
-          if (maxYear) p.append('max_year', maxYear);
 
           const r = await fetch(`/api/search?${p}`, {
             headers: { 'Authorization': `Bearer ${getToken()}` }
@@ -3416,8 +3202,6 @@
         $('ddSummaryContent').innerHTML = '<div class="dd-summary-loading"><div class="spinner" style="width:16px;height:16px;"></div> Generando resumen…</div>';
         $('ddModal').style.display = 'flex';
         $('ddTitle').textContent = 'Cargando…';
-        $('ddExif').style.display = 'none';
-        $('ddExif').innerHTML = '';
         $('ddBody').innerHTML = '<div class="fe-empty"><div class="spinner" style="width:24px;height:24px;margin:0 auto"></div></div>';
         $('ddSource').textContent = source;
 
@@ -3447,8 +3231,9 @@
           }
 
           // EXIF DATA RENDERING
+          $('ddMetadataToggle').style.display = 'none';
           if (doc.exif_metadata && Object.keys(doc.exif_metadata).length > 0) {
-            let exifHtml = '<h4 style="margin:0 0 12px 0;font-size:0.85rem;color:rgba(20,33,61,0.5);text-transform:uppercase;letter-spacing:0.5px;">Metadatos Técnicos (ExifTool)</h4><div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:12px;">';
+            let exifHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:12px;">';
             for (const [key, value] of Object.entries(doc.exif_metadata)) {
               // Excluir metadatos redundantes o rutas internas del Docker container
               if (['Directory', 'SourceFile', 'ExifToolVersion', 'FileName'].includes(key)) continue;
@@ -3459,16 +3244,20 @@
                 </div>`;
             }
             exifHtml += '</div>';
-            $('ddExif').innerHTML = exifHtml;
-            $('ddExif').style.display = 'block';
+            $('metadataModalContent').innerHTML = exifHtml;
+            $('ddMetadataToggle').style.display = 'inline-flex';
           }
 
         } catch (e) {
           $('ddBody').innerHTML = `<div class="fe-empty">⚠️ ${esc(e.message)}</div>`;
         }
       }
+      function toggleMetadataModal() {
+        $('metadataModal').style.display = 'flex';
+      }
 
       function closeDocDetail() {
+        $('metadataModal').style.display = 'none';
         $('ddModal').style.display = 'none';
         $('ddChat').style.display = 'none';
         $('ddChatMessages').innerHTML = '';
@@ -3639,7 +3428,6 @@
 
 	      /* ── Escuchadores de Eventos ───────────────────────────── */
 	      $('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') onSearchSubmit() });
-	      initFilterBindings();
 	      initActionDelegation();
 
 	      /* ── Inicialización (Boot) ────────────────────────────── */
