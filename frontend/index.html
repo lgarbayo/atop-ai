@@ -164,19 +164,45 @@
     }
     
     @media (max-width: 768px) {
+      .app-header {
+        position: static !important;
+        background: var(--bg) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: none !important;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+      }
       .app-header__top {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
       }
       .app-logo {
         width: 50px !important;
         height: 50px !important;
+        margin: 0 auto;
       }
       .app-header__actions {
         width: 100%;
-        justify-content: flex-start;
-        gap: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+      .app-header__actions .btn,
+      .user-avatar-container {
+        flex: 0 1 auto !important;
+        min-width: auto !important;
+        width: auto !important;
+        font-size: .8rem !important;
+        padding: 8px 16px !important;
+        margin: 0 !important;
+        display: flex !important;
+        border-radius: 12px !important;
+      }
+      .user-avatar-container .btn {
+        width: auto !important;
       }
       .home-dashboard {
         grid-template-columns: 1fr;
@@ -188,19 +214,12 @@
       .search-input {
         font-size: 1rem !important;
       }
-      .btn {
-        font-size: .8rem;
-        padding: 8px 12px;
-      }
       .hero-title {
-        font-size: 2.5rem !important;
-        margin: 40px 0 20px !important;
+        font-size: 2.2rem !important; /* Slightly smaller */
+        margin: 30px 0 15px !important;
       }
       .hero-title span.subtitle {
-        font-size: 1rem !important;
-      }
-      .user-avatar-container {
-        gap: 4px;
+        font-size: .95rem !important;
       }
     }
 
