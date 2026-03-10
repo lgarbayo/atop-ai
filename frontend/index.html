@@ -2721,6 +2721,24 @@
       // ---------------------------
 
       /* ── Inicialización ──────────────────────────────────────── */
+      /* ── Inicialización Google Sign-In ───────────────────────── */
+      function renderGoogleButton() {
+        if (typeof google !== 'undefined' && google.accounts) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredential,
+          });
+          google.accounts.id.renderButton(
+            $('googleSignInBtn'),
+            { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 300 }
+          );
+        } else {
+          // Si la librería aún no carga, esperamos un poco
+          setTimeout(renderGoogleButton, 100);
+        }
+      }
+
+      /* ── Inicialización ──────────────────────────────────────── */
       (async function initApp() {
         await initI18n();
         const savedUser = localStorage.getItem(GOOGLE_USER_KEY);
@@ -2734,18 +2752,7 @@
           }
         }
         // Renderizar botón de Google (visible solo en overlay)
-        window.addEventListener('load', () => {
-          if (typeof google !== 'undefined' && google.accounts) {
-            google.accounts.id.initialize({
-              client_id: GOOGLE_CLIENT_ID,
-              callback: handleGoogleCredential,
-            });
-            google.accounts.id.renderButton(
-              $('googleSignInBtn'),
-              { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 300 }
-            );
-          }
-        });
+        renderGoogleButton();
       })();
 
       /* ── Toast ─────────────────────────────────────────────── */
