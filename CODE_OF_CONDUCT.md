@@ -1,39 +1,35 @@
-# Código de Conducta de Colaboradores
+# Contributor Code of Conduct
 
-## Nuestro Compromiso
+## Our Pledge
 
-En el interés de fomentar un ambiente abierto y acogedor, nosotros como colaboradores y mantenedores nos comprometemos a hacer de la participación en nuestro proyecto y nuestra comunidad una experiencia libre de acoso para todos, independientemente de age, tamaño corporal, discapacidad, etnia, identidad de género, expresión de género, nivel de experiencia, nacionalidad, apariencia personal, raza, religión, o identidad u orientación sexual.
+In the interest of fostering an open and welcoming environment, we as contributors and maintainers pledge to make participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-## Nuestros Estándares
+## Our Standards
 
-Ejemplos de comportamiento que contribuyen a crear un ambiente positivo incluyen:
+Examples of behavior that contributes to creating a positive environment include:
+- Using welcoming and inclusive language.
+- Being respectful of differing viewpoints and experiences.
+- Gracefully accepting constructive criticism.
+- Focusing on what is best for the community.
+- Showing empathy towards other community members.
 
-- Usar lenguaje acogedor e inclusivo
-- Ser respetuoso con puntos de vista y experiencias diferentes
-- Aceptar crítica constructiva con gratitud
-- Enfocarse en lo que es mejor para la comunidad
-- Mostrar empatía hacia otros miembros de la comunidad
+Examples of unacceptable behavior include:
+- The use of sexualized language or imagery and unwelcome sexual attention or advances.
+- Trolling, insulting/derogatory comments, and personal or political attacks.
+- Public or private harassment.
+- Publishing others' private information without explicit permission.
+- Other conduct which could reasonably be considered inappropriate in a professional setting.
 
-Ejemplos de comportamiento inaceptable incluyen:
+## Enforcement
 
-- Uso de lenguaje o imágenes sexualizadas y atención sexual no deseada
-- Trolling, comentarios insultantes/derogatorios, y ataques personales o políticos
-- Acoso público o privado
-- Publicar información privada de otros sin permiso
-- Otra conducta que podría razonablemente ser considerada inapropiada en un contexto profesional
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at **security@atopai.cloud**. 
 
-## Aplicación
+All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident.
 
-Las instancias de comportamiento abusivo, de acoso, u otro comportamiento inaceptable pueden ser reportadas contactando al equipo del proyecto en **meigasearch@example.com**.
+## Attribution
 
-Todos los reportes serán revisados e investigados, y resultarán en una respuesta considerada apropiada para el contexto. El equipo del proyecto está obligado a mantener la confidencialidad respecto al reportante de un incidente.
-
-Mantenedores que no sigan o hagan cumplir el Código de Conducta de buena fe pueden enfrentar repercusiones temporales o permanentes según lo determine la lideranza del proyecto.
-
-## Atribución
-
-Este Código de Conducta es una adaptación del [Contributor Covenant](https://www.contributor-covenant.org), versión 1.4.
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 1.4.
 
 ---
 
-*El presente Código de Conducta aplica a todos los espacios del proyecto, incluyendo repositorio, issues, discussiones, y cualquier comunicación oficial del equipo.*
+*This Code of Conduct applies to all project spaces, including repositories, issues, discussions, and official community communications.*
