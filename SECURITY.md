@@ -1,86 +1,60 @@
-# Política de Seguridad
+# Security Policy
 
-## Reportar Vulnerabilidades
+## Reporting Vulnerabilities
 
-**IMPORTANTE**: No abras issues públicos para reportar vulnerabilidades de seguridad.
+**IMPORTANT**: Please do not open public issues to report security vulnerabilities.
 
-Si descubres una vulnerabilidad de seguridad en MeigaSearch, por favor **reporta directamente por email** a:
+If you discover a security vulnerability in AtopAI, please **report it directly via email** to:
 
-📧 **meigasearch@example.com**
+📧 **security@atopai.cloud** (Placeholder: Use your real security contact email)
 
-### Qué incluir en tu reporte
+### What to include in your report
 
-1. **Descripción**: Qué es la vulnerabilidad y cómo impacta
-2. **Ubicación**: Archivo, línea de código, componente afectado
-3. **Severidad**: Crítica, Alta, Media, Baja
-4. **Pasos para reproducir**: Cómo verificar la vulnerabilidad
-5. **Propuesta de fix** (opcional): Si tienes una solución
+1. **Description**: What the vulnerability is and its impact.
+2. **Location**: File, line of code, or affected component.
+3. **Severity**: Critical, High, Medium, or Low.
+4. **Steps to Reproduce**: How to verify the vulnerability.
+5. **Proposed Fix** (optional): If you have a solution.
 
-### Ejemplo de reporte
+## Response Process
 
-```
-Subject: [SECURITY] Vulnerabilidad XSS en búsqueda
+1. **Acknowledgment**: You will receive a response within 48 hours.
+2. **Investigation**: We will evaluate the report and its severity.
+3. **Fix**: We will work on a patch or mitigation.
+4. **Coordination**: We will notify you when the fix is published.
+5. **Disclosure**: Recognition in a security advisory (optional).
 
-Descripción:
-El parámetro 'q' en la búsqueda no está sanitizado, permitiendo inyección de JavaScript.
+## Our Commitment
 
-Ubicación:
-frontend/index.html, línea ~2350, función performSearch()
+- ✅ We investigate all reported vulnerabilities.
+- ✅ We will not publish details until a fix is available.
+- ✅ We prioritize critical severity reports.
+- ✅ We acknowledge responsible researchers.
 
-Severidad: Alta
+## Security Practices in AtopAI
 
-Pasos para reproducir:
-1. Buscar con query: <img src=x onerror=alert('XSS')>
-2. Ver la UI renderizada sin escape
+### Authentication
+- JWT tokens with 24h expiration.
+- Validation on every API endpoint.
+- Role-Based Access Control (RBAC).
 
-Solución propuesta:
-Usar esc() antes de insertar en el DOM o DOMPurify
-```
+### Data
+- Local processing options to maintain data sovereignty.
+- Secure vector database communication (Qdrant).
+- Input sanitization before indexing and searching.
 
-## Proceso de Respuesta
+### Dependencies
+- Regularly updated libraries.
+- Dependency auditing using automated tools.
 
-1. **Confirmación**: Recibirás una respuesta en 48 horas
-2. **Investigación**: Evaluaremos el reporte y la severidad
-3. **Fix**: Trabajaremos en un parche
-4. **Coordinación**: Te notificaremos cuando se publique el fix
-5. **Disclosure**: Reconocimiento en un advisory de seguridad (si lo deseas)
+## Supported Versions
 
-## Nuestro Compromiso
-
-- ✅ Investigamos todas las vulnerabilidades reportadas
-- ✅ No publicaremos detalles hasta que haya un fix
-- ✅ Trabajamos rápidamente en severidad crítica
-- ✅ Reconocemos a los investigadores responsables
-
-## Prácticas de Seguridad en MeigaSearch
-
-### Autenticación
-- JWT tokens con expiración de 24h
-- Validación en cada endpoint
-- RBAC por departamento
-
-### Datos
-- Procesamiento local (sin APIs externas)
-- Qdrant con validación de payloads
-- Sanitización de inputs antes de buscar
-
-### Dependencias
-- Pinned versions en requirements.txt
-- Actualizaciones regulares de librerías
-- Auditoría con `pip-audit`
-
-## Vulnerabilidades Conocidas
-
-N/A - Proyecto en Hackathon 2026
-
-## Versiones Soportadas
-
-| Versión | Soportada |
+| Version | Supported |
 | ------- | --------- |
-| 1.0.x   | ✅ Sí     |
+| 1.1.x   | ✅ Yes     |
+| 1.0.x   | ⚠️ Limited |
 
-## Contacto de Seguridad
+## Security Contact
 
-**Email**: meigasearch@example.com
-**GPG**: No disponible en Hackathon
-**Respuesta esperada**: 48 horas
+**Email**: security@atopai.cloud
+**Expected Response Time**: 48 hours
