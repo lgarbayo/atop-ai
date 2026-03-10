@@ -1,0 +1,7 @@
+atopai.cloud {
+    reverse_proxy app:8000
+}
+
+www.atopai.cloud {
+    redir https://atopai.cloud{uri}
+}
