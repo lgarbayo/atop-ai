@@ -39,9 +39,7 @@ docker compose up -d
 
 Core Services:
 - **Qdrant** (port 6333): Vector database
-- **Redis** (port 6379): Message broker
 - **FastAPI** (port 8000): Application API
-- **Celery**: Background processing workers
 
 ## Coding Standards
 
