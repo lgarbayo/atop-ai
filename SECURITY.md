@@ -6,7 +6,7 @@
 
 If you discover a security vulnerability in AtopAI, please **report it directly via email** to:
 
-📧 **security@atopai.cloud** (Placeholder: Use your real security contact email)
+📧 **lugarbayo@gmail.com**
 
 ### What to include in your report
 
@@ -56,5 +56,5 @@ If you discover a security vulnerability in AtopAI, please **report it directly 
 
 ## Security Contact
 
-**Email**: security@atopai.cloud
+**Email**: lugarbayo@gmail.com
 **Expected Response Time**: 48 hours
