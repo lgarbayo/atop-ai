@@ -39,6 +39,28 @@ logger = logging.getLogger(__name__)
 # Inicialización del router principal. Las etiquetas (tags) ayudan a organizar la documentación en Swagger UI.
 router = APIRouter()
 
+from fastapi import Depends, Header
+
+# ── Dependencias de Usuario ───────────────────────────────────────
+
+def get_user_id(x_user_id: str = Header(None)):
+    """Recupera el ID del usuario del header. Es obligatorio para la privacidad."""
+    if not x_user_id:
+        logger.warning("🚨 Intento de acceso sin X-User-ID")
+        raise HTTPException(status_code=401, detail="X-User-ID header is missing or empty")
+    return x_user_id
+
+def get_user_api_key(request: Request):
+    """Recupera la API Key de Gemini buscando en varios headers por compatibilidad."""
+    api_key = request.headers.get("X-Gemini-API-Key") or request.headers.get("x-gemini-api-key")
+    
+    if not api_key:
+        from core.config import settings
+        api_key = settings.GEMINI_API_KEY
+        if not api_key:
+            logger.error("❌ No hay API Key disponible ni en el header ni en la configuración global.")
+    return api_key
+
 
 
 
@@ -49,25 +71,13 @@ router = APIRouter()
 async def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
+    user_id: str = Depends(get_user_id),
+    api_key: str = Depends(get_user_api_key),
 ):
     """
     Sube un documento para su procesamiento asíncrono en segundo plano.
-
-    Este endpoint actúa como la puerta de entrada para la pipeline de documentos:
-        1. Valida la extensión del archivo comparándola con los tipos soportados.
-        2. Persiste el archivo binario en el directorio central 'sharepoint_data'.
-        3. Dispara una tarea de Celery para realizar la extracción de texto e indexación.
-
-    Args:
-        file (UploadFile): El documento binario enviado por el cliente.
-        background_tasks (BackgroundTasks): Cola de tareas asíncronas interna de FastAPI.
-
-    Returns:
-        JSONResponse: Estado 202 Accepted con el ID de la tarea local.
-
-    Nota: El estado del procesamiento debe consultarse vía /api/status/{task_id}.
     """
-    # Validación de extensión — salida temprana para ahorrar recursos
+    # Validación de extensión
     ext = Path(file.filename).suffix.lower()
     if ext not in SUPPORTED_EXTENSIONS:
         raise HTTPException(
@@ -75,20 +85,18 @@ async def upload_document(
             detail=f"Formato no soportado: {ext}. Permitidos: {', '.join(SUPPORTED_EXTENSIONS)}"
         )
 
-    # Capa de persistencia: guardamos el archivo original para permitir
-    # re-indexación o revisión manual. La ruta está centralizada.
-    upload_dir = Path("./sharepoint_data")
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    # Capa de persistencia aislada por usuario
+    user_upload_dir = Path(settings.UPLOAD_DIR) / user_id
+    user_upload_dir.mkdir(parents=True, exist_ok=True)
 
-    file_path = upload_dir / file.filename
-    file_path.parent.mkdir(parents=True, exist_ok=True)  # crea subdirectorios si la ruta es relativa (ej. carpeta/subcarpeta/file.pdf)
+    file_path = user_upload_dir / file.filename
     try:
         content = await file.read()
         with open(file_path, "wb") as f:
             f.write(content)
-        logger.info(f"📁 Archivo guardado: {file_path} ({len(content)} bytes)")
+        logger.info(f"📁 Archivo guardado en {user_upload_dir}: {file.filename} ({len(content)} bytes)")
     except Exception as e:
-        logger.error(f"Error de persistencia: {e}")
+        logger.error(f"Error de persistencia (User: {user_id}): {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Error interno al guardar el documento: {e}"
@@ -98,25 +106,21 @@ async def upload_document(
     task_id = str(uuid.uuid4())
     _UPLOAD_STATUS[task_id] = {"status": "PROCESSING", "filename": file.filename}
 
-    # Función envoltorio para acoplar la función que antes era de Celery
-    async def process_and_update():
+    async def _process_task(uid: str, key: str):
         try:
-            # Ejecutamos el procesamiento en otro hilo para no bloquear el Event Loop de FastAPI
-            await asyncio.to_thread(process_document, str(file_path), file.filename)
+            await asyncio.to_thread(process_document, str(file_path), file.filename, user_id=uid, api_key=key)
             _UPLOAD_STATUS[task_id] = {"status": "SUCCESS", "filename": file.filename}
         except Exception as e:
             logger.error(f"Error procesando documento {file.filename}: {e}")
             _UPLOAD_STATUS[task_id] = {"status": "FAILURE", "error": str(e), "filename": file.filename}
 
-    # Disparar tarea a BackgroundTasks (hilo local)
-    background_tasks.add_task(process_and_update)
-
-    logger.info(f"🚀 Tarea local disparada: {task_id} para {file.filename}")
+    background_tasks.add_task(_process_task, user_id, api_key)
+    logger.info(f"🚀 Tarea local disparada: {task_id} para {file.filename} (User: {user_id})")
 
     return JSONResponse(
         status_code=202,
         content={
-            "message": "Documento recibido. Procesamiento iniciado en segundo plano.",
+            "message": "Documento recibido. Procesamiento iniciado.",
             "task_id": task_id,
             "filename": file.filename,
         }
@@ -186,6 +190,7 @@ async def search_documents(
     month: int = Query(None, ge=1, le=12, description="Filtrar por mes de creación"),
     min_year: int = Query(None, ge=1900, description="Año mínimo de creación/modificación"),
     max_year: int = Query(None, ge=1900, description="Año máximo de creación/modificación"),
+    user_id: str = Depends(get_user_id),
 ):
     """
     ¿CÓMO BUSCAMOS LA INFORMACIÓN? (El Motor de Búsqueda).
@@ -290,7 +295,8 @@ async def search_documents(
         # ── MODO TEXTUAL (Ctrl+F) ─────────────────────────────────
         if mode == "text":
             raw_results = await vdb.text_search(
-                query=q,  # usar query original sin normalizar para búsqueda exacta
+                query=q,
+                user_id=user_id,
                 top_k=top_k,
                 filters=filters if filters else None,
                 range_filters=range_filters if range_filters else None,
@@ -303,6 +309,7 @@ async def search_documents(
             raw_results = await vdb.hybrid_search(
                 query=q_normalized,
                 query_text=q_normalized,
+                user_id=user_id,
                 top_k=top_k,
                 filters=filters if filters else None,
                 range_filters=range_filters if range_filters else None,
@@ -398,28 +405,26 @@ async def search_documents(
 from fastapi.responses import FileResponse
 
 
-def _find_file_on_disk(source: str) -> Path | None:
-    """Intenta encontrar el archivo físico, ya sea absoluto, relativo o solo por nombre."""
+def _find_file_on_disk(source: str, user_id: str = None) -> Path | None:
+    """Intenta encontrar el archivo físico, priorizando la carpeta del usuario para seguridad."""
     file_path = Path(source)
-    if file_path.exists() and file_path.is_file():
+    filename_to_find = file_path.name
+
+    # 1. Prioridad Máxima: Carpeta del usuario (Aislamiento Total)
+    if user_id:
+        user_path = Path(settings.UPLOAD_DIR) / user_id / filename_to_find
+        if user_path.exists() and user_path.is_file():
+            return user_path
+
+    # 2. Fallback: Archivos globales o datasets (si aplica)
+    if file_path.is_absolute() and file_path.exists():
         return file_path
 
-    # Fallback 1: Docker absolute to local relative
-    if str(file_path).startswith("/app/datasets/"):
-        rel_path = str(file_path)[len("/app/datasets/"):]
-        local_path = Path("../datasets") / rel_path
-        if local_path.exists() and local_path.is_file():
-            return local_path
-            
-    # Fallback 2: Es solo un nombre de archivo (o no se encontró la ruta absoluta).
-    # Buscamos en las carpetas de datos conocidas.
-    search_dirs = ["/app/datasets", "/app/uploads", "./sharepoint_data", "/app/sharepoint_data", "../datasets", "../uploads"]
-    filename_to_find = file_path.name
-    
+    search_dirs = ["/app/datasets", "/app/uploads", "./sharepoint_data", "/app/sharepoint_data"]
     for d in search_dirs:
         dir_path = Path(d)
-        if not dir_path.exists() or not dir_path.is_dir():
-            continue
+        if not dir_path.exists(): continue
+        # Búsqueda recursiva
         for root, _, files in os.walk(str(dir_path)):
             if filename_to_find in files:
                 found = Path(root) / filename_to_find
@@ -428,33 +433,34 @@ def _find_file_on_disk(source: str) -> Path | None:
     return None
 
 @router.get("/document/view", tags=["Documentos"])
-async def view_document(source: str = Query(..., description="Ruta del archivo fuente")):
+async def view_document(source: str = Query(..., description="Ruta del archivo fuente"), user_id: str = Depends(get_user_id)):
     """
     Sirve el archivo original directamente para visualizarlo (PDF, Imagen, etc.).
     """
-    file_path = _find_file_on_disk(source)
+    file_path = _find_file_on_disk(source, user_id=user_id)
     
     if not file_path:
-        raise HTTPException(status_code=404, detail="El archivo original ya no existe en disco.")
+        logger.warning(f"⚠️ Archivo no encontrado para usuario {user_id}: {source}")
+        raise HTTPException(status_code=404, detail="El archivo original ya no existe en disco o no tienes permiso.")
         
     return FileResponse(path=file_path)
 
 @router.get("/documents", tags=["Documentos"])
-async def get_all_documents(request: Request) -> list[dict]:
+async def get_all_documents(request: Request, user_id: str = Depends(get_user_id)) -> list[dict]:
     """
-    Recupera una lista de todos los documentos indexados en la base de datos vectorial.
+    Recupera una lista de todos los documentos indexados en la base de datos vectorial con filtro por usuario.
     """
     vdb = VectorDBService()
-    return await vdb.get_all_documents()
+    return await vdb.get_all_documents(user_id=user_id)
 
 @router.get("/document", tags=["Documentos"])
-async def get_document_detail(request: Request, source: str = Query(..., description="Ruta del archivo fuente")):
+async def get_document_detail(request: Request, source: str = Query(..., description="Ruta del archivo fuente"), user_id: str = Depends(get_user_id)):
     """
-    Recupera todos los chunks de un documento y los reconstruye con metadatos.
+    Recupera todos los chunks de un documento y los reconstruye con metadatos (filtrado por usuario).
     """
     try:
         vdb = VectorDBService()
-        chunks = await vdb.get_by_source(source)
+        chunks = await vdb.get_by_source(source, user_id=user_id)
 
         if not chunks:
             raise HTTPException(status_code=404, detail=f"Documento no encontrado: {source}")
@@ -463,7 +469,7 @@ async def get_document_detail(request: Request, source: str = Query(..., descrip
         full_text = "\n\n".join([c["text"] for c in chunks])
 
         # Obtener tamaño del archivo si existe (usando el helper)
-        file_path = _find_file_on_disk(source)
+        file_path = _find_file_on_disk(source, user_id=user_id)
         file_size = file_path.stat().st_size if file_path else None
 
         # Metadatos
@@ -516,6 +522,8 @@ class GlobalChatRequest(BaseModel):
 @router.post("/global-chat", tags=["Chat"])
 async def global_rag_chat(
     body: GlobalChatRequest,
+    user_id: str = Depends(get_user_id),
+    api_key: str = Depends(get_user_api_key),
 ):
     """
     Chat RAG global con Streaming (SSE), memoria de conversación y citación de fuentes.
@@ -547,6 +555,7 @@ async def global_rag_chat(
             query=body.pregunta,
             query_text=body.pregunta,
             top_k=5,
+            user_id=user_id,
         )
 
         async def generate_error(msg):
@@ -581,7 +590,7 @@ async def global_rag_chat(
         context = "\n\n---\n\n".join(context_parts)[:6000]
 
         # 3. Generation (Stream)
-        llm = get_llm_service()
+        llm = get_llm_service(api_key=api_key)
         system_prompt = (
             "Eres un asistente corporativo. Responde la pregunta basándote ÚNICAMENTE "
             "en la información proporcionada. Usa identificadores como [1], [2] explícitamente "
@@ -623,6 +632,8 @@ class ChatDocumentRequest(BaseModel):
 @router.post("/chat-document", tags=["Chat"])
 async def chat_document(
     body: ChatDocumentRequest,
+    user_id: str = Depends(get_user_id),
+    api_key: str = Depends(get_user_api_key),
 ):
     """
     Inicia una conversación enfocada en un único documento específico.
@@ -646,7 +657,7 @@ async def chat_document(
         from services.llm_service import get_llm_service
 
         vdb = VectorDBService()
-        chunks = await vdb.get_by_source(body.doc_id)
+        chunks = await vdb.get_by_source(body.doc_id, user_id=user_id)
         if not chunks:
             raise HTTPException(status_code=404, detail=f"Documento no encontrado: {body.doc_id}")
 
@@ -654,7 +665,7 @@ async def chat_document(
         chunks_sorted = sorted(chunks, key=lambda c: c.get("chunk_index") or 0)
         context = "\n\n".join(c["text"] for c in chunks_sorted)[:5000]
 
-        llm = get_llm_service()
+        llm = get_llm_service(api_key=api_key)
         # Llamada bloqueante al modelo → se delega a un thread del pool
         answer = await asyncio.to_thread(llm.chat, body.pregunta, context)
 
@@ -674,6 +685,8 @@ async def chat_document(
 @router.post("/documents/summary", tags=["Documentos"])
 async def document_summary(
     source: str = Query(...),
+    user_id: str = Depends(get_user_id),
+    api_key: str = Depends(get_user_api_key),
 ):
     """
     Genera o recupera un resumen ejecutivo del documento.
@@ -692,23 +705,23 @@ async def document_summary(
     try:
         from services.llm_service import get_llm_service
         vdb = VectorDBService()
-        chunks = await vdb.get_by_source(source)
+        chunks = await vdb.get_by_source(source, user_id=user_id)
         if not chunks:
             raise HTTPException(status_code=404, detail=f"Documento no encontrado: {source}")
 
-        # Cache hit: el primer chunk ya tiene resumen
+        # Cache hit: el primer chunk ya tiene resumen (y no es un error guardado)
         cached = chunks[0].get("resumen")
-        if cached:
+        if cached and not cached.startswith("Error al generar resumen"):
             return {"summary": cached, "source": source, "cached": True}
 
         # Cache miss: generar con LLM
         chunks_sorted = sorted(chunks, key=lambda c: c.get("chunk_index") or 0)
         full_text = "\n\n".join(c["text"] for c in chunks_sorted)[:5000]
-        llm = get_llm_service()
+        llm = get_llm_service(api_key=api_key)
         summary = await asyncio.to_thread(llm.summarize, full_text)
 
         # Persistir en Qdrant para que quede en caché
-        await vdb.update_document_summary(source, summary)
+        await vdb.update_document_summary(source, user_id, summary)
 
         return {"summary": summary, "source": source, "cached": False}
 
@@ -727,6 +740,8 @@ class DocumentChatRequest(BaseModel):
 async def document_chat(
     body: DocumentChatRequest,
     source: str = Query(...),
+    user_id: str = Depends(get_user_id),
+    api_key: str = Depends(get_user_api_key),
 ):
     """
     Chat contextual restringido a un solo archivo.
@@ -742,13 +757,13 @@ async def document_chat(
     try:
         from services.llm_service import get_llm_service
         vdb = VectorDBService()
-        chunks = await vdb.get_by_source(source)
+        chunks = await vdb.get_by_source(source, user_id=user_id)
         if not chunks:
             raise HTTPException(status_code=404, detail=f"Documento no encontrado: {source}")
 
         chunks_sorted = sorted(chunks, key=lambda c: c.get("chunk_index") or 0)
         context = "\n\n".join(c["text"] for c in chunks_sorted)[:5000]
-        llm = get_llm_service()
+        llm = get_llm_service(api_key=api_key)
         answer = await asyncio.to_thread(llm.chat, body.pregunta, context)
 
         return {"answer": answer, "source": source}
@@ -791,17 +806,17 @@ async def update_llm_settings(
     if body.provider != "gemini":
         raise HTTPException(status_code=422, detail="Solo se admite el proveedor 'gemini' actualmente.")
 
-    os.environ["LLM_PROVIDER"] = "gemini"
-
-    if body.api_key:
-        os.environ["GEMINI_API_KEY"] = body.api_key
-
-    # Resetear el singleton para que la próxima llamada cargue el nuevo proveedor
+    # SEGURIDAD: Ya no sobreescribimos os.environ["GEMINI_API_KEY"] globalmente.
+    # La API Key se maneja de forma segura enviándose en los headers de cada petición 
+    # desde el frontend (localStorage del usuario). 
+    
+    # Validamos que el proveedor sea correcto y reseteamos la factoría
+    # para asegurar que las próximas peticiones usen la lógica correcta.
     from services.llm_service import LLMFactory
     LLMFactory.reset()
 
-    logger.info(f"⚙️  LLM settings updated → provider={body.provider}")
-    return {"ok": True, "provider": body.provider}
+    logger.info(f"⚙️  LLM settings validated for provider={body.provider} (Session-based key management)")
+    return {"ok": True, "provider": body.provider, "message": "Settings validated. Using client-provided API keys."}
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -955,7 +970,7 @@ async def clear_database():
 
 
 @router.get("/filter-metadata", tags=["Filtros"])
-async def get_filter_metadata():
+async def get_filter_metadata(user_id: str = Depends(get_user_id)):
     """
     Recupera valores únicos de metadatos para poblar los filtros del frontend.
 
@@ -975,7 +990,7 @@ async def get_filter_metadata():
 
         from qdrant_client.models import FieldCondition, Filter, MatchValue
 
-        query_filter = None
+        query_filter = Filter(must=[FieldCondition(key="user_id", match=MatchValue(value=user_id))])
 
         # Obtener todos los puntos en la colección
         authors = set()

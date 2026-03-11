@@ -1,11 +1,10 @@
 """
 services/llm_service.py — EL CEREBRO DE LA APLICACIÓN (IA).
 ---------------------------------------------------------
-Ahora simplificada exclusivamente para Gemini y evitar dependencias innecesarias 
-en entornos de bajos recursos.
+Versión recuperada del commit "fix: mobile responsive" pero manteniendo 
+la arquitectura de aislamiento (multi-tenancy) por API Key.
 """
 
-import os
 import logging
 from abc import ABC, abstractmethod
 
@@ -36,29 +35,43 @@ class BaseLLMProvider(ABC):
 
 
 # ═══════════════════════════════════════════════════════════════
-#  PROVEEDOR GOOGLE GEMINI
+#  PROVEEDOR GOOGLE GEMINI (SDK)
 # ═══════════════════════════════════════════════════════════════
 
 class GeminiProvider(BaseLLMProvider):
     """
-    Integración con Google Gemini (Generative AI).
-
-    Especialmente útil por su gran ventana de contexto y velocidad en 
-    tareas de razonamiento intermedio. Requiere GEMINI_API_KEY.
+    Integración con Google Gemini (Generative AI SDK).
+    Mantiene el aislamiento usando la API Key proporcionada por el usuario.
     """
-    def __init__(self):
+    def __init__(self, api_key: str = None):
         import google.generativeai as genai
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model_name = os.getenv("GEMINI_LLM_MODEL", "gemini-2.0-flash")
-        self.model = genai.GenerativeModel(model_name)
-        logger.info(f"✅ Gemini LLM inicializado: {model_name}")
+        from core.config import settings
+        
+        # Prioridad: Clave pasada por argumento > Ajustes globales
+        actual_key = api_key or settings.GEMINI_API_KEY
+        actual_model = settings.GEMINI_LLM_MODEL or "gemini-2.0-flash"
+        
+        if not actual_key:
+            logger.error("❌ No se ha configurado ninguna GEMINI_API_KEY")
+            raise Exception("API Key de Gemini no configurada.")
+
+        genai.configure(api_key=actual_key)
+        self.model = genai.GenerativeModel(actual_model)
+        
+        masked_key = f"{actual_key[:6]}...{actual_key[-4:]}" if actual_key and len(actual_key) > 10 else "N/A"
+        logger.info(f"✅ Gemini SDK inicializado: {actual_model} (Key: {masked_key})")
 
     def summarize(self, text: str) -> str:
         prompt = (
             f"Resume el siguiente texto corporativo en 3-5 frases concisas en español. "
             f"Responde SOLO con el resumen:\n\n{text}"
         )
-        return self.model.generate_content(prompt).text.strip()
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text.strip()
+        except Exception as e:
+            logger.error(f"❌ Error en summarize (SDK): {e}")
+            raise
 
     def _build_content_gemini(self, prompt: str, context: str, history: list[dict] = None) -> str:
         historico = ""
@@ -81,27 +94,41 @@ class GeminiProvider(BaseLLMProvider):
 
     def chat(self, prompt: str, context: str, history: list[dict] = None) -> str:
         full_prompt = self._build_content_gemini(prompt, context, history)
-        return self.model.generate_content(full_prompt).text.strip()
+        try:
+            response = self.model.generate_content(full_prompt)
+            return response.text.strip()
+        except Exception as e:
+            logger.error(f"❌ Error en chat (SDK): {e}")
+            raise
 
     def chat_stream(self, prompt: str, context: str, history: list[dict] = None):
         full_prompt = self._build_content_gemini(prompt, context, history)
-        response = self.model.generate_content(full_prompt, stream=True)
-        for chunk in response:
-            if chunk.text:
-                yield chunk.text
+        try:
+            response = self.model.generate_content(full_prompt, stream=True)
+            for chunk in response:
+                if chunk.text:
+                    yield chunk.text
+        except Exception as e:
+            logger.error(f"❌ Error en chat_stream (SDK): {e}")
+            raise
 
 
 # ═══════════════════════════════════════════════════════════════
-#  FACTORY — selecciona el proveedor (forzado a Gemini)
+#  FACTORY — selecciona el proveedor
 # ═══════════════════════════════════════════════════════════════
 
 class LLMFactory:
     _instance: BaseLLMProvider | None = None
 
     @classmethod
-    def get_provider(cls) -> BaseLLMProvider:
+    def get_provider(cls, api_key: str = None) -> BaseLLMProvider:
+        # Si hay API key de usuario, creamos una instancia volátil (aislamiento total)
+        if api_key:
+            return GeminiProvider(api_key=api_key)
+            
+        # Si no, creamos/usamos el singleton global (con la clave del .env)
         if cls._instance is None:
-            logger.info(f"🏭 Inicializando LLM provider forzado a: Gemini")
+            logger.info("🏭 Inicializando LLM provider global (SDK)")
             cls._instance = GeminiProvider()
         return cls._instance
 
@@ -110,5 +137,5 @@ class LLMFactory:
         cls._instance = None
 
 
-def get_llm_service() -> BaseLLMProvider:
-    return LLMFactory.get_provider()
+def get_llm_service(api_key: str = None) -> BaseLLMProvider:
+    return LLMFactory.get_provider(api_key=api_key)

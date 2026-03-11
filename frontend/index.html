@@ -209,10 +209,11 @@
         gap: 16px;
       }
       .dashboard-col {
-        padding: 20px !important;
-        margin: 0 !important;
+        padding: 14px !important; /* Más compacto */
+        margin: 0 auto !important;
         min-height: auto !important;
         width: 100% !important;
+        max-width: 300px !important; /* Aún más estrecho para evitar recortes */
       }
       .app-container {
         padding: 12px 14px 48px !important;
@@ -234,7 +235,8 @@
       .mode-btn {
         width: 100% !important;
         justify-content: center !important;
-        padding: 12px 20px !important;
+        padding: 10px 16px !important;
+        font-size: 0.85rem !important;
       }
       .hero-title {
         font-size: 2.2rem !important;
@@ -2701,6 +2703,13 @@
 
       /* Stubs de compatibilidad */
       function getToken() { return localStorage.getItem(GOOGLE_USER_KEY) ? 'google-auth' : ''; }
+      function getUserId() {
+        const user = JSON.parse(localStorage.getItem(GOOGLE_USER_KEY) || '{}');
+        return user.sub || '';
+      }
+      function getApiKey() {
+        return localStorage.getItem('meiga_api_key') || '';
+      }
       function getRole() { return 'admin'; }
       function showLoginModal() { $('googleLoginOverlay').style.display = 'flex'; }
 
@@ -2742,6 +2751,7 @@
 
       function googleLogout() {
         localStorage.removeItem(GOOGLE_USER_KEY);
+        localStorage.removeItem('meiga_api_key'); // También limpiamos la API Key por seguridad
         location.reload();
       }
 
@@ -2851,8 +2861,13 @@
         if (!list) return;
         try {
           list.innerHTML = `<li class="recent-item" style="color:rgba(0,0,0,0.5); justify-content:center; padding: 20px;">Cargando catálogo...</li>`;
-          const apiKey = localStorage.getItem('meiga_api_key') || '';
-          const res = await fetch('/api/documents', { headers: { 'X-API-Key': apiKey } });
+          const res = await fetch('/api/documents', { 
+            headers: { 
+              'X-User-ID': getUserId(),
+              'X-Gemini-API-Key': getApiKey()
+            } 
+          });
+          if (res.status === 401) { showLoginModal(); return; }
           const data = await res.json();
           if (Array.isArray(data)) {
             count.textContent = data.length > 0 ? data.length : '';
@@ -2951,23 +2966,46 @@
         $('uploadProgressModal').style.display = 'flex';
 
         let succeeded = 0, failed = 0;
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          $('uploadProgressCurrent').textContent = file.name;
-          $('uploadProgressCount').textContent = `${i + 1} / ${files.length}`;
-          $('uploadProgressFill').style.width = `${Math.round((i / files.length) * 100)}%`;
-          try {
-            const fd = new FormData();
-            fd.append('file', file);
-            const r = await fetch('/api/upload', {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${getToken()}` },
-              body: fd,
-            });
-            if (!r.ok) throw new Error((await r.json()).detail || 'Error');
-            succeeded++;
-          } catch { failed++; }
+        const CONCURRENCY_LIMIT = 2; // Subir de 2 en 2 para máxima estabilidad
+        let currentIndex = 0;
+
+        async function uploadWorker() {
+          while (currentIndex < files.length) {
+            const i = currentIndex++;
+            const file = files[i];
+            
+            // Actualizar UI
+            if (i % 2 === 0 || i === files.length - 1) {
+              $('uploadProgressCurrent').textContent = file.name;
+              $('uploadProgressCount').textContent = `${i + 1} / ${files.length}`;
+              $('uploadProgressFill').style.width = `${Math.round((i / files.length) * 100)}%`;
+            }
+
+            try {
+              const fd = new FormData();
+              fd.append('file', file);
+              const r = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 
+                  'X-User-ID': getUserId(),
+                  'X-Gemini-API-Key': getApiKey()
+                },
+                body: fd,
+              });
+              if (!r.ok) throw new Error((await r.json()).detail || 'Error');
+              succeeded++;
+            } catch (e) {
+              console.error(`Error subiendo ${file.name}:`, e);
+              failed++;
+            }
+          }
         }
+
+        const workers = [];
+        for (let w = 0; w < Math.min(CONCURRENCY_LIMIT, files.length); w++) {
+          workers.push(uploadWorker());
+        }
+        await Promise.all(workers);
 
         $('uploadProgressFill').style.width = '100%';
         $('uploadProgressCount').textContent = `${files.length} / ${files.length}`;
@@ -3025,15 +3063,24 @@
 
       /* ── Settings modal ─────────────────────────────────────── */
       function openSettingsModal() {
+        const input = $('settingsApiKey');
+        if (input) input.value = getApiKey();
         document.getElementById('settingsModal').showModal();
       }
       async function saveSettings() {
         const provider = "gemini";
         const api_key = $('settingsApiKey').value.trim() || null;
         try {
+          // Guardar localmente primero
+          localStorage.setItem('meiga_api_key', api_key);
+          
           const r = await fetch('/api/system/settings', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-User-ID': getUserId(),
+              'X-Gemini-API-Key': api_key
+            },
             body: JSON.stringify({ provider, api_key })
           });
           if (r.status === 401) { showLoginModal(); return; }
@@ -3052,7 +3099,12 @@
         if (!confirm('¿Seguro que quieres eliminar TODOS los documentos indexados? Esta acción no se puede deshacer.')) return;
         try {
           showToast('Purgando base de datos…', 5000);
-          const r = await fetch('/api/system/database', { method: 'DELETE' });
+          const r = await fetch('/api/system/database', { 
+            method: 'DELETE',
+            headers: { 
+              'X-User-ID': getUserId()
+            }
+          });
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           // Limpiar también el directorio almacenado en IndexedDB
           await dbSet(DIR_KEY, '');
@@ -3258,7 +3310,10 @@
           const p = new URLSearchParams({ q, top_k: 1000, mode: isText ? 'text' : 'semantic' });
 
           const r = await fetch(`/api/search?${p}`, {
-            headers: { 'Authorization': `Bearer ${getToken()}` }
+            headers: { 
+              'X-User-ID': getUserId(),
+              'X-Gemini-API-Key': getApiKey()
+            }
           });
           if (r.status === 401) { showLoginModal(); return; }
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -3415,26 +3470,46 @@
         $('ddSource').textContent = source;
 
         try {
-          const r = await fetch(`/api/document?source=${encodeURIComponent(source)}`);
+          const r = await fetch(`/api/document?source=${encodeURIComponent(source)}`, {
+            headers: { 
+              'X-User-ID': getUserId(),
+              'X-Gemini-API-Key': getApiKey()
+            }
+          });
           if (!r.ok) throw new Error('Documento no encontrado');
           const doc = await r.json();
 
           $('ddTitle').textContent = doc.title;
 
-          // Render documento original embebido o texto crudo
-          const url = `/api/document/view?source=${encodeURIComponent(source)}`;
+          // Render documento original embebido o texto crudo con seguridad (Blobs)
           const ext = (doc.extension || '').toLowerCase();
           const isImg = /\.(png|jpg|jpeg|gif)$/i.test(ext);
           const isPdf = /\.pdf$/i.test(ext);
 
-          if (isImg) {
-            $('ddBody').innerHTML = `<div style="text-align:center;padding:0px;background:#f5f5f5;height:100%;min-height:50vh;display:flex;align-items:center;justify-content:center;"><img src="${url}" style="max-width:100%;max-height:50vh;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>`;
-            $('ddBody').style.padding = '0';
-          } else if (isPdf) {
-            $('ddBody').innerHTML = `<iframe src="${url}" style="width:100%;height:100%;min-height:50vh;border:none;border-radius:8px;background:#f5f5f5;"></iframe>`;
-            $('ddBody').style.padding = '0';
+          if (isImg || isPdf) {
+            try {
+              const resView = await fetch(`/api/document/view?source=${encodeURIComponent(source)}`, {
+                headers: { 'X-User-ID': getUserId() }
+              });
+              if (!resView.ok) throw new Error('No se pudo cargar la vista previa');
+              const blob = await resView.blob();
+              const blobUrl = URL.createObjectURL(blob);
+              
+              // Guardar referencia para limpiar luego
+              if (window._currentBlobUrl) URL.revokeObjectURL(window._currentBlobUrl);
+              window._currentBlobUrl = blobUrl;
+
+              if (isImg) {
+                $('ddBody').innerHTML = `<div style="text-align:center;padding:0px;background:#f5f5f5;height:100%;min-height:50vh;display:flex;align-items:center;justify-content:center;"><img src="${blobUrl}" style="max-width:100%;max-height:50vh;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>`;
+              } else {
+                $('ddBody').innerHTML = `<iframe src="${blobUrl}" style="width:100%;height:100%;min-height:50vh;border:none;border-radius:8px;background:#f5f5f5;"></iframe>`;
+              }
+              $('ddBody').style.padding = '0';
+            } catch (e) {
+              $('ddBody').innerHTML = `<div class="fe-empty" style="min-height:50vh">⚠️ No se pudo cargar el archivo: ${esc(e.message)}</div>`;
+            }
           } else {
-            // Fallback para CSV, TXT, XLSX (se muestran como texto extraído para evitar descargas)
+            // Fallback para CSV, TXT, XLSX (se muestran como texto extraído)
             $('ddBody').innerHTML = `<div style="white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#f8f9fa;padding:24px;border-radius:8px;border:1px solid #e2e8f0;overflow-x:auto;font-size:0.9rem;line-height:1.6;color:#334155;height:100%;min-height:50vh;">${esc(doc.fullText)}</div>`;
             $('ddBody').style.padding = '20px';
           }
@@ -3471,6 +3546,12 @@
         $('ddChat').style.display = 'none';
         $('ddChatMessages').innerHTML = '';
         $('ddSummaryPanel').style.display = 'none';
+        
+        if (window._currentBlobUrl) {
+          URL.revokeObjectURL(window._currentBlobUrl);
+          window._currentBlobUrl = null;
+        }
+        
         currentDocSource = null;
       }
 
@@ -3499,7 +3580,10 @@
         try {
           const r = await fetch(`/api/documents/summary?source=${encodeURIComponent(currentDocSource)}`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${getToken()}` }
+            headers: { 
+              'X-User-ID': getUserId(),
+              'X-Gemini-API-Key': getApiKey()
+            }
           });
           if (r.status === 401) { showLoginModal(); return; }
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -3545,7 +3629,8 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${getToken()}`
+              'X-User-ID': getUserId(),
+              'X-Gemini-API-Key': getApiKey()
             },
             body: JSON.stringify({ doc_id: currentDocSource, pregunta })
           });
@@ -3614,7 +3699,10 @@
 
           const r = await fetch('/api/upload', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${getToken()}` },
+            headers: { 
+              'X-User-ID': getUserId(),
+              'X-Gemini-API-Key': getApiKey()
+            },
             body: formData
           });
 

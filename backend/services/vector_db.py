@@ -187,19 +187,14 @@ class VectorDBService:
         except Exception:
             pass  # Índice ya existe o no se pudo crear
 
-    def upsert(self, chunks: list[str], metadata: list[dict]) -> int:
+    def upsert(self, chunks: list[str], metadata: list[dict], user_id: str = None) -> int:
         """
         Transforma fragmentos de texto en vectores y los persiste en Qdrant.
-
-        Proceso:
-            1. Vectorización: Envía los chunks al embedder (Local o API).
-            2. Estructuración: Empaqueta cada vector con su ID único (UUIDv4) 
-               y sus metadatos asociados.
-            3. Inserción: Realiza una operación de 'upsert' masiva por eficiencia.
 
         Args:
             chunks (list[str]): Textos limpios para indexar.
             metadata (list[dict]): Metadatos enriquecidos (fuente, página, etc.).
+            user_id (str): Identificador único del usuario propietario.
 
         Returns:
             int: Cantidad de fragmentos insertados exitosamente.
@@ -213,13 +208,18 @@ class VectorDBService:
         # Crear puntos para Qdrant
         points = []
         for i, (chunk, embedding, meta) in enumerate(zip(chunks, embeddings, metadata)):
+            # Inyectar user_id en el payload
+            payload = {
+                "text": chunk,      # El texto original del chunk
+                **meta,             # source, page, etc.
+            }
+            if user_id:
+                payload["user_id"] = user_id
+
             point = PointStruct(
                 id=str(uuid.uuid4()),  # ID único por chunk
                 vector=embedding,
-                payload={
-                    "text": chunk,      # El texto original del chunk
-                    **meta,             # source, page, etc.
-                },
+                payload=payload,
             )
             points.append(point)
 
@@ -234,6 +234,7 @@ class VectorDBService:
     async def search(
         self, 
         query: str, 
+        user_id: str,  # Ahora es obligatorio
         top_k: int = 5,
         filters: dict = None,
         range_filters: dict = None,
@@ -267,6 +268,8 @@ class VectorDBService:
         query_filter = None
         must_conditions = []
         
+        if user_id:
+            must_conditions.append(FieldCondition(key="user_id", match=MatchValue(value=user_id)))
         if filters:
             # En vez de "must" (AND) estricto entre extensiones y categorías,
             # lo cambiamos a "should" (OR) global. Si el usuario marca "PDF" y "Finanzas",
@@ -333,6 +336,7 @@ class VectorDBService:
     async def text_search(
         self,
         query: str,
+        user_id: str,  # Ahora es obligatorio
         top_k: int = 100,
         filters: dict = None,
         range_filters: dict = None,
@@ -353,6 +357,8 @@ class VectorDBService:
         must_conditions = [
             FieldCondition(key="text", match=MatchText(text=query))
         ]
+
+        must_conditions.append(FieldCondition(key="user_id", match=MatchValue(value=user_id)))
 
         if filters:
             should_conditions = []
@@ -432,6 +438,7 @@ class VectorDBService:
         self,
         query: str,
         query_text: str,
+        user_id: str,  # Ahora es obligatorio
         top_k: int = 5,
         filters: dict = None,
         range_filters: dict = None,
@@ -486,6 +493,9 @@ class VectorDBService:
             for field, value in exact_filters.items():
                 if value is not None:
                     must_conditions.append(FieldCondition(key=field, match=MatchValue(value=value)))
+
+        if user_id:
+            must_conditions.append(FieldCondition(key="user_id", match=MatchValue(value=user_id)))
 
         def _build_filter(extra_must_text=None):
             """Construye el Filter de Qdrant con opciones de filtrado."""
@@ -578,19 +588,15 @@ class VectorDBService:
         merged.sort(key=lambda r: r["score"], reverse=True)
         return merged[:top_k]
 
-    async def get_by_source(self, source: str) -> list[dict]:
-        """
-        Recupera la totalidad de los fragmentos asociados a un archivo específico.
-
-        Utiliza una operación de 'scroll' sobre Qdrant para obtener todos los 
-        metadatos y textos sin necesidad de realizar una búsqueda por similitud. 
-        Útil para reconstruir documentos para chat o visualización.
-        """
+    async def get_by_source(self, source: str, user_id: str) -> list[dict]:
+        """Recupera todos los fragmentos asociados a una fuente y usuario específicos."""
         await asyncio.to_thread(self.ensure_collection)
+        must = [
+            FieldCondition(key="source", match=MatchValue(value=source)),
+            FieldCondition(key="user_id", match=MatchValue(value=user_id))
+        ]
 
-        query_filter = Filter(
-            must=[FieldCondition(key="source", match=MatchValue(value=source))]
-        )
+        query_filter = Filter(must=must)
 
         results, _ = await asyncio.to_thread(
             self.client.scroll,
@@ -622,19 +628,22 @@ class VectorDBService:
         formatted.sort(key=lambda x: x.get("chunk_index", 0) or 0)
         return formatted
 
-    async def get_all_documents(self) -> list[dict]:
+    async def get_all_documents(self, user_id: str) -> list[dict]:
         """
-        Recupera una lista única (distinct) de todos los documentos indexados en la base de datos.
+        Recupera una lista única (distinct) de todos los documentos indexados en la base de datos pertenecientes al usuario.
         """
         await asyncio.to_thread(self.ensure_collection)
         results = []
         offset = None
         seen_sources = set()
 
+        q_filter = Filter(must=[FieldCondition(key="user_id", match=MatchValue(value=user_id))])
+
         while True:
             scroll_res, next_offset = await asyncio.to_thread(
                 self.client.scroll,
                 collection_name=self.collection_name,
+                scroll_filter=q_filter,
                 limit=1000,
                 offset=offset,
                 with_payload=True,
@@ -659,12 +668,9 @@ class VectorDBService:
                 
         return sorted(results, key=lambda x: x["title"].lower())
 
-    async def update_document_summary(self, source: str, summary: str) -> None:
+    async def update_document_summary(self, source: str, user_id: str, summary: str) -> None:
         """
-        Persiste un resumen generado por IA en todos los fragmentos de un documento.
-
-        Permite implementar una caché de resúmenes directamente en la base de 
-        datos vectorial, evitando llamadas redundantes al LLM en el futuro.
+        Persiste un resumen generado por IA en todos los fragmentos de un documento y usuario.
         """
         await asyncio.to_thread(self.ensure_collection)
         await asyncio.to_thread(
@@ -672,6 +678,7 @@ class VectorDBService:
             collection_name=self.collection_name,
             payload={"resumen": summary},
             points=Filter(must=[
-                FieldCondition(key="source", match=MatchValue(value=source))
+                FieldCondition(key="source", match=MatchValue(value=source)),
+                FieldCondition(key="user_id", match=MatchValue(value=user_id))
             ]),
         )

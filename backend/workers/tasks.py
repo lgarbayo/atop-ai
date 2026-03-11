@@ -27,7 +27,7 @@ from core.config import settings
 logger = logging.getLogger(__name__)
 
 
-def process_document(file_path: str, original_filename: str) -> dict:
+def process_document(file_path: str, original_filename: str, user_id: str = None, api_key: str = None) -> dict:
     """
     Ejecuta el ciclo de vida completo de ingesta de un documento.
 
@@ -61,7 +61,7 @@ def process_document(file_path: str, original_filename: str) -> dict:
         summary = ""
         try:
             from services.llm_service import get_llm_service
-            llm = get_llm_service()
+            llm = get_llm_service(api_key=api_key)
             summary = llm.summarize(cleaned_text[:5000])
             logger.info(f"📝 Resumen generado: {len(summary)} caracteres")
         except Exception as e:
@@ -96,7 +96,7 @@ def process_document(file_path: str, original_filename: str) -> dict:
             chunk_meta.update(doc_metadata)
             metadata.append(chunk_meta)
 
-        inserted = vdb.upsert(chunks=chunks, metadata=metadata)
+        inserted = vdb.upsert(chunks=chunks, metadata=metadata, user_id=user_id)
         logger.info(f"✅ {inserted} vectores insertados en Qdrant")
 
         # ── Resultado ──

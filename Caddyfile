@@ -1,5 +1,10 @@
 atopai.cloud {
     reverse_proxy app:8000
+    
+    # Aumentar límites para subidas pesadas
+    request_body {
+        max_size 500MB
+    }
 }
 
 www.atopai.cloud {
